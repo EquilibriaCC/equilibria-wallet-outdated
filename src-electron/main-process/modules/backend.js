@@ -109,9 +109,9 @@ export class Backend {
                 theme: "dark"
             }
         }
-
+        //this is too long
         if (this.config_data.app.scan == undefined) {
-            this.config_data.app.scan = true
+            this.config_data.app.scan = false
         }
 
 
