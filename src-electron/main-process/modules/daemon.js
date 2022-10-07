@@ -372,7 +372,7 @@ export class Daemon {
 
         // remove when remote nodes are updated to support method
         if (method == "on_get_staker") {
-            uri = "http://198.199.82.27:9231/json_rpc"
+            uri = "http://154.38.165.93:9231/json_rpc"
         }
 
         let requestOptions = {

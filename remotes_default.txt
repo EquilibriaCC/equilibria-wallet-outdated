@@ -13,23 +13,7 @@
         "port": 9231
     },
     {
-        "host": "singapore.equilibria.network",
-        "port": 9231
-    },
-    {
-        "host": "ams.equilibria.network",
-        "port": 9231
-    },
-    {
-        "host": "sanfran.equilibria.network",
-        "port": 9231
-    },
-    {
-        "host": "india.equilibria.network",
-        "port": 9231
-    },
-    {
-        "host": "newyork.equilibria.network",
+        "host": "154.38.165.93",
         "port": 9231
     }
 ]

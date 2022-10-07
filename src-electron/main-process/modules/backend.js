@@ -62,7 +62,7 @@ export class Backend {
         const daemons = {
             mainnet: {
                 ...daemon,
-                remote_host: "newyork.equilibria.network",
+                remote_host: "154.38.165.93",
                 remote_port: 9231
             },
             stagenet: {
@@ -133,25 +133,10 @@ export class Backend {
                     "port": 9231
                 },
                 {
-                    "host": "singapore.equilibria.network",
-                    "port": 9231
-                },
-                {
-                    "host": "ams.equilibria.network",
-                    "port": 9231
-                },
-                {
-                    "host": "sanfran.equilibria.network",
-                    "port": 9231
-                },
-                {
-                    "host": "india.equilibria.network",
-                    "port": 9231
-                },
-                {
-                    "host": "newyork.equilibria.network",
+                    "host": "154.38.165.93",
                     "port": 9231
                 }
+
             ], null, 4)
             fs.writeFile(path.join(this.config_dir, "gui", "remotes.json"), remotes, "utf8", () => {
 
@@ -301,7 +286,7 @@ export class Backend {
 
             case "open_explorer":
                 if (params.type == "tx") {
-                    require("electron").shell.openExternal("https://explorer.equilibria.network/tx/" + params.id)
+                    require("electron").shell.openExternal("http://154.38.165.93/tx/" + params.id)
                 }
                 break
 

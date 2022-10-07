@@ -34,18 +34,18 @@
             <img class="q-mb-md" src="xeq_logo_with_padding.png" />
 
             <p class="q-my-sm">Version: v{{version}}-v{{daemonVersion}}</p>
-            <p class="q-my-sm">Copyright (c) 2018-2020, Equilibria Project</p>
+            <p class="q-my-sm">Copyright (c) 2018-2022, Equilibria Project</p>
             <p class="q-my-sm">Copyright (c) 2018-2019, Loki Project</p>
             <p class="q-my-sm">Copyright (c) 2018, Ryo Currency Project</p>
             <p class="q-my-sm">All rights reserved.</p>
 
             <div class="q-mt-md q-mb-lg external-links">
                 <p>
-                    <a @click="openExternal('https://equilibria.network/')" href="#">https://equilibria.network/</a>
+                    <a @click="openExternal('https://equilibriacc.github.io/')" href="#">https://equilibriacc.github.io/</a>
                 </p>
                 <p>
-                    <a @click="openExternal('https://discord.gg/76E3vfE')" href="#">Discord</a> -
-                    <a @click="openExternal('https://www.reddit.com/r/equilibrianetwork/')" href="#">Reddit</a> -
+                    <a @click="openExternal('https://discord.gg/Ps9pBmc2QX')" href="#">Discord</a> -
+                    <a @click="openExternal('https://t.me/EquilibriaCommunity')" href="#">Telegram</a> -
                     <a @click="openExternal('https://github.com/EquilibriaCC/Equilibria')" href="#">Github</a>
                 </p>
             </div>
