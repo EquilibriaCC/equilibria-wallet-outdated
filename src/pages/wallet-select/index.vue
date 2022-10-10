@@ -57,7 +57,7 @@
 <script>
 const { clipboard } = require("electron")
 import { mapState } from "vuex"
-import Identicon from "components/identicon"
+// import Identicon from "components/identicon"
 
 export default {
     computed: mapState({
@@ -72,22 +72,22 @@ export default {
             const actions = [
                 {
                     name: "Create new account",
-                    handler: this.createNewWallet,
+                    handler: this.createNewWallet
                 },
                 {
                     name: "Restore account from seed",
-                    handler: this.restoreWallet,
+                    handler: this.restoreWallet
                 },
                 {
                     name: "Import account from file",
-                    handler: this.importWallet,
+                    handler: this.importWallet
                 }
-            ];
+            ]
 
             if (this.wallets.directories.length > 0) {
-                actions.push( {
+                actions.push({
                     name: "Import accounts from old GUI",
-                    handler: this.importOldGuiWallets,
+                    handler: this.importOldGuiWallets
                 })
             }
 
@@ -98,7 +98,7 @@ export default {
         this.$gateway.send("wallet", "list_wallets")
     },
     methods: {
-        async openWallet(wallet) {
+        async openWallet (wallet) {
             // this.$gateway.send("wallet", "open_wallet", {name: wallet.name, password: ""});
             // const checkRoute = async () => {
             //     while (this.$router.history.current.name == "wallet-select") {
@@ -106,8 +106,7 @@ export default {
             //     }
             // }
             // checkRoute()
-            console.log('test', this.$router.history.current)
-            if(wallet.password_protected !== false) {
+            if (wallet.password_protected !== false) {
                 this.$q.dialog({
                     title: "Password",
                     message: "Enter account password to continue.",
@@ -128,39 +127,39 @@ export default {
                     this.$q.loading.show({
                         delay: 0
                     })
-                    this.$gateway.send("wallet", "open_wallet", {name: wallet.name, password: password});
+                    this.$gateway.send("wallet", "open_wallet", { name: wallet.name, password: password })
                 })
-                .catch(() => {
-                })
+                    .catch(() => {
+                    })
             } else {
                 this.$q.loading.show({
                     delay: 0
                 })
-                this.$gateway.send("wallet", "open_wallet", {name: wallet.name, password: ""});
+                this.$gateway.send("wallet", "open_wallet", { name: wallet.name, password: "" })
             }
         },
-        createNewWallet() {
-            this.$router.replace({ path: "wallet-select/create" });
+        createNewWallet () {
+            this.$router.replace({ path: "wallet-select/create" })
         },
-        restoreWallet() {
-            this.$router.replace({ path: "wallet-select/restore" });
+        restoreWallet () {
+            this.$router.replace({ path: "wallet-select/restore" })
         },
-        restoreViewWallet() {
-            this.$router.replace({ path: "wallet-select/import-view-only" });
+        restoreViewWallet () {
+            this.$router.replace({ path: "wallet-select/import-view-only" })
         },
-        importWallet() {
-            this.$router.replace({ path: "wallet-select/import" });
+        importWallet () {
+            this.$router.replace({ path: "wallet-select/import" })
         },
-        importOldGuiWallets() {
-            this.$router.replace({ path: "wallet-select/import-old-gui" });
+        importOldGuiWallets () {
+            this.$router.replace({ path: "wallet-select/import-old-gui" })
         },
-        importLegacyWallet() {
-            this.$router.replace({ path: "wallet-select/import-legacy" });
+        importLegacyWallet () {
+            this.$router.replace({ path: "wallet-select/import-legacy" })
         },
         copyAddress (address, event) {
             event.stopPropagation()
-            for(let i = 0; i < event.path.length; i++) {
-                if(event.path[i].tagName == "BUTTON") {
+            for (let i = 0; i < event.path.length; i++) {
+                if (event.path[i].tagName === "BUTTON") {
                     event.path[i].blur()
                     break
                 }
@@ -175,34 +174,34 @@ export default {
     },
     watch: {
         status: {
-            handler(val, old){
-                if(val.code == old.code) return
-                switch(this.status.code) {
-                    case 0: // Wallet loaded
-                        this.$q.loading.hide()
-                        this.$router.replace({ path: "/wallet" });
-                        break;
-                    case -1: // Error
-                    case -22:
-                        this.$q.loading.hide()
-                        this.$q.notify({
-                            type: "negative",
-                            timeout: 1000,
-                            message: this.status.message
-                        })
-                        this.$store.commit("gateway/set_wallet_data", {
-                            status: {
-                                code: 1 // Reset to 1 (ready for action)
-                            }
-                        });
-                        break;
+            handler (val, old) {
+                if (val.code === old.code) return
+                switch (this.status.code) {
+                case 0: // Wallet loaded
+                    this.$q.loading.hide()
+                    this.$router.replace({ path: "/wallet" })
+                    break
+                case -1: // Error
+                case -22:
+                    this.$q.loading.hide()
+                    this.$q.notify({
+                        type: "negative",
+                        timeout: 1000,
+                        message: this.status.message
+                    })
+                    this.$store.commit("gateway/set_wallet_data", {
+                        status: {
+                            code: 1 // Reset to 1 (ready for action)
+                        }
+                    })
+                    break
                 }
             },
             deep: true
         }
     },
     components: {
-        Identicon
+        // Identicon
     }
 }
 </script>

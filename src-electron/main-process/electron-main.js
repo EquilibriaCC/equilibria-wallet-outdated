@@ -119,19 +119,19 @@ function createWindow () {
             }
 
             if (!fs.existsSync(config_dir)) {
-                fs.mkdirpSync(config_dir)
+                fs.mkdirSync(config_dir, { recursive: true })
             }
 
             if (!fs.existsSync(path.join(config_dir, "gui"))) {
-                fs.mkdirpSync(path.join(config_dir, "gui"))
+                fs.mkdirSync(path.join(config_dir, "gui"), { recursive: true })
             }
 
-            fs.writeFile(path.join(config_dir, "gui", "port.json"), JSON.stringify({port: port}), "utf8", () => {
+            fs.writeFile(path.join(config_dir, "gui", "port.json"), JSON.stringify({ port: port }), "utf8", () => {
 
             })
 
             portscanner.checkPortStatus(config.port, "127.0.0.1", (error, status) => {
-                if (status == "closed") {
+                if (status === "closed") {
                     backend = new Backend(mainWindow)
                     backend.init(config)
                     mainWindow.webContents.send("initialize", config)

@@ -145,7 +145,6 @@ This is an unused class in triton
             </div>
         </q-modal>
 
-
         <q-modal minimized v-model="modals.rescan.visible">
             <div class="modal-header">Rescan wallet</div>
             <div class="q-ma-lg">
@@ -163,8 +162,7 @@ This is an unused class in triton
                         flat class="q-mr-sm"
                         @click="hideModal('rescan')"
                         label="Close"
-                        color:
-                    "red"
+                        color: red
                     />
                     <q-btn
                         color="positive"
@@ -290,24 +288,24 @@ export default {
         return {
             modals: {
                 private_keys: {
-                    visible: false,
+                    visible: false
                 },
                 rescan: {
                     visible: false,
-                    type: "full",
+                    type: "full"
                 },
                 key_image: {
                     visible: false,
                     type: "Export",
                     export_path: "",
-                    import_path: "",
+                    import_path: ""
                 },
                 change_password: {
                     visible: false,
                     old_password: "",
                     new_password: "",
-                    new_password_confirm: "",
-                },
+                    new_password_confirm: ""
+                }
             }
         }
     },
@@ -319,7 +317,7 @@ export default {
     watch: {
         secret: {
             handler (val, old) {
-                if (val.view_key == old.view_key) return
+                if (val.view_key === old.view_key) return
                 switch (this.secret.view_key) {
                 case "":
                     break
@@ -356,7 +354,7 @@ export default {
         copyPrivateKey (type, event) {
             event.stopPropagation()
             for (let i = 0; i < event.path.length; i++) {
-                if (event.path[i].tagName == "BUTTON") {
+                if (event.path[i].tagName === "BUTTON") {
                     event.path[i].blur()
                     break
                 }
@@ -366,7 +364,7 @@ export default {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
-                    message: "Error copying private key",
+                    message: "Error copying private key"
                 })
                 return
             }
@@ -380,7 +378,7 @@ export default {
                 ok: {
                     label: "OK",
                     color: "positive"
-                },
+                }
             }).then(() => {
                 this.$q.notify({
                     type: "positive",
@@ -432,7 +430,7 @@ export default {
         },
         rescanWallet () {
             this.hideModal("rescan")
-            if (this.modals.rescan.type == "full") {
+            if (this.modals.rescan.type === "full") {
                 this.$q.dialog({
                     title: "Rescan wallet",
                     message: "Warning: Some information about previous transactions\nsuch as the recipient's address will be lost.",
@@ -485,12 +483,12 @@ export default {
                     color: "red"
                 }
             }).then(password => {
-                if (this.modals.key_image.type == "Export") {
+                if (this.modals.key_image.type === "Export") {
                     this.$gateway.send("wallet", "export_key_images", {
                         password: password,
                         path: this.modals.key_image.export_path
                     })
-                } else if (this.modals.key_image.type == "Import") {
+                } else if (this.modals.key_image.type === "Import") {
                     this.$gateway.send("wallet", "import_key_images", {
                         password: password,
                         path: this.modals.key_image.import_path
@@ -498,21 +496,19 @@ export default {
                 }
             }).catch(() => {
             })
-
         },
         doChangePassword () {
-
             let old_password = this.modals.change_password.old_password
             let new_password = this.modals.change_password.new_password
             let new_password_confirm = this.modals.change_password.new_password_confirm
 
-            if (new_password == old_password) {
+            if (new_password === old_password) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
                     message: "New password must be different"
                 })
-            } else if (new_password != new_password_confirm) {
+            } else if (new_password !== new_password_confirm) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
@@ -522,7 +518,6 @@ export default {
                 this.hideModal("change_password")
                 this.$gateway.send("wallet", "change_wallet_password", { old_password, new_password })
             }
-
         },
         clearChangePassword () {
             this.modals.change_password.old_password = ""
@@ -571,7 +566,7 @@ export default {
         Formattriton,
         AddressHeader,
         TxList
-    },
+    }
 }
 </script>
 

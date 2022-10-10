@@ -30,7 +30,7 @@
                 <tritonField class="col-4" label="Local Daemon Port (RPC)">
                     <q-input
                         v-model="config_daemon.rpc_bind_port"
-                        :placeholder="toString(daemon_defaults.rpc_bind_port)"
+                        :placeholder="asString(daemon_defaults.rpc_bind_port)"
                         type="number"
                         :decimals="0"
                         :step="1"
@@ -68,7 +68,7 @@
                 <tritonField class="col-4" label="Remote Node Port">
                     <q-input
                         v-model="config_daemon.remote_port"
-                        :placeholder="toString(daemon_defaults.remote_port)"
+                        :placeholder="asString(daemon_defaults.remote_port)"
                         type="number"
                         :decimals="0"
                         :step="1"
@@ -95,7 +95,6 @@
                            label="Add Node"/>
                 </div>
             </div>
-
 
         </template>
 
@@ -156,12 +155,12 @@
 
             <div class="row pl-sm q-mt-sm">
                 <tritonField class="col-6" label="Daemon Log Level" :disable="is_remote">
-                    <q-input v-model="config_daemon.log_level" :placeholder="toString(daemon_defaults.log_level)"
+                    <q-input v-model="config_daemon.log_level" :placeholder="asString(daemon_defaults.log_level)"
                              :disable="is_remote" :dark="theme=='dark'"
                              type="number" :decimals="0" :step="1" min="0" max="4" hide-underline/>
                 </tritonField>
                 <tritonField class="col-6" label="Wallet Log Level">
-                    <q-input v-model="config.wallet.log_level" :placeholder="toString(defaults.wallet.log_level)"
+                    <q-input v-model="config.wallet.log_level" :placeholder="asString(defaults.wallet.log_level)"
                              :dark="theme=='dark'"
                              type="number" :decimals="0" :step="1" min="0" max="4" hide-underline/>
                 </tritonField>
@@ -169,24 +168,24 @@
 
             <div class="row pl-sm q-mt-md">
                 <tritonField class="col-3" label="Max Incoming Peers" :disable="is_remote">
-                    <q-input v-model="config_daemon.in_peers" :placeholder="toString(daemon_defaults.in_peers)"
+                    <q-input v-model="config_daemon.in_peers" :placeholder="asString(daemon_defaults.in_peers)"
                              :disable="is_remote" :dark="theme=='dark'"
                              type="number" :decimals="0" :step="1" min="-1" max="65535" hide-underline/>
                 </tritonField>
                 <tritonField class="col-3" label="Max Outgoing Peers" :disable="is_remote">
-                    <q-input v-model="config_daemon.out_peers" :placeholder="toString(daemon_defaults.out_peers)"
+                    <q-input v-model="config_daemon.out_peers" :placeholder="asString(daemon_defaults.out_peers)"
                              :disable="is_remote" :dark="theme=='dark'"
                              type="number" :decimals="0" :step="1" min="-1" max="65535" hide-underline/>
                 </tritonField>
                 <tritonField class="col-3" label="Limit Upload Rate" :disable="is_remote">
                     <q-input v-model="config_daemon.limit_rate_up"
-                             :placeholder="toString(daemon_defaults.limit_rate_up)" :disable="is_remote"
+                             :placeholder="asString(daemon_defaults.limit_rate_up)" :disable="is_remote"
                              :dark="theme=='dark'"
                              type="number" suffix="Kb/s" :decimals="0" :step="1" min="-1" max="65535" hide-underline/>
                 </tritonField>
                 <tritonField class="col-3" label="Limit Download Rate" :disable="is_remote">
                     <q-input v-model="config_daemon.limit_rate_down"
-                             :placeholder="toString(daemon_defaults.limit_rate_down)" :disable="is_remote"
+                             :placeholder="asString(daemon_defaults.limit_rate_down)" :disable="is_remote"
                              :dark="theme=='dark'"
                              type="number" suffix="Kb/s" :decimals="0" :step="1" min="-1" max="65535" hide-underline/>
                 </tritonField>
@@ -194,24 +193,24 @@
             <div class="row pl-sm q-mt-md">
                 <tritonField class="col-3" label="Daemon P2P Port" :disable="is_remote">
                     <q-input v-model="config_daemon.p2p_bind_port"
-                             :placeholder="toString(daemon_defaults.p2p_bind_port)" :disable="is_remote"
+                             :placeholder="asString(daemon_defaults.p2p_bind_port)" :disable="is_remote"
                              :dark="theme=='dark'"
                              float- type="number" :decimals="0" :step="1" min="1024" max="65535" hide-underline/>
                 </tritonField>
                 <tritonField class="col-3" label="Daemon ZMQ Port" :disable="is_remote">
                     <q-input v-model="config_daemon.zmq_rpc_bind_port"
-                             :placeholder="toString(daemon_defaults.zmq_rpc_bind_port)" :disable="is_remote"
+                             :placeholder="asString(daemon_defaults.zmq_rpc_bind_port)" :disable="is_remote"
                              :dark="theme=='dark'"
                              float- type="number" :decimals="0" :step="1" min="1024" max="65535" hide-underline/>
                 </tritonField>
                 <tritonField class="col-3" label="Internal Wallet Port">
-                    <q-input v-model="config.app.ws_bind_port" :placeholder="toString(defaults.app.ws_bind_port)"
+                    <q-input v-model="config.app.ws_bind_port" :placeholder="asString(defaults.app.ws_bind_port)"
                              :dark="theme=='dark'"
                              float- type="number" :decimals="0" :step="1" min="1024" max="65535" hide-underline/>
                 </tritonField>
                 <tritonField class="col-3" label="Wallet RPC Port" :disable="is_remote">
                     <q-input v-model="config.wallet.rpc_bind_port"
-                             :placeholder="toString(defaults.wallet.rpc_bind_port)" :disable="is_remote"
+                             :placeholder="asString(defaults.wallet.rpc_bind_port)" :disable="is_remote"
                              :dark="theme=='dark'"
                              float- type="number" :decimals="0" :step="1" min="1024" max="65535" hide-underline/>
                 </tritonField>
@@ -233,7 +232,7 @@
 </template>
 
 <script>
-import {mapState} from "vuex"
+import { mapState } from "vuex"
 import tritonField from "components/triton_field"
 
 const path = require("upath")
@@ -245,88 +244,86 @@ export default {
         randomise_remote: {
             type: Boolean,
             required: false,
-            default: false,
-        },
+            default: false
+        }
     },
     computed: mapState({
         theme: state => state.gateway.app.config.appearance.theme,
         _remotes: state => state.gateway.app.remotes,
         config: state => state.gateway.app.pending_config,
-        config_daemon(state) {
+        config_daemon (state) {
             return this.config.daemons[this.config.app.net_type]
         },
-        is_remote(state) {
-            return this.config_daemon.type === 'remote'
+        is_remote (state) {
+            return this.config_daemon.type === "remote"
         },
         defaults: state => state.gateway.app.defaults,
-        daemon_defaults(state) {
+        daemon_defaults (state) {
             return this.defaults.daemons[this.config.app.net_type]
         }
     }),
-    beforeMount() {
+    beforeMount () {
         this.remotes = this._remotes
     },
-    mounted() {
+    mounted () {
         if (this.randomise_remote && this.remotes.length > 0 && this.config.app.net_type === "mainnet") {
-            const index = Math.floor(Math.random() * Math.floor(this.remotes.length));
-            this.setPreset(this.remotes[index]);
+            const index = Math.floor(Math.random() * Math.floor(this.remotes.length))
+            this.setPreset(this.remotes[index])
         }
     },
     methods: {
-        removeRemote() {
+        removeRemote () {
             let remotes = JSON.parse(fs.readFileSync(path.join(this.config.app.data_dir, "gui", "remotes.json")))
             let new_remotes = []
             for (const i in remotes) {
-                if (remotes[i].host != this.config_daemon.remote_host) {
+                if (remotes[i].host !== this.config_daemon.remote_host) {
                     new_remotes.push(remotes[i])
                 }
             }
-            this.$gateway.send("core", "change_remotes", new_remotes);
+            this.$gateway.send("core", "change_remotes", new_remotes)
             this.remotes = new_remotes
         },
-        addRemote() {
+        addRemote () {
             let remotes = JSON.parse(fs.readFileSync(path.join(this.config.app.data_dir, "gui", "remotes.json")))
             let check = false
             for (const i in remotes) {
-                if (remotes[i].host == this.config_daemon.remote_host) {
+                if (remotes[i].host === this.config_daemon.remote_host) {
                     check = true
                 }
             }
-            console.log(remotes)
 
-            if (check)
-                return
-            remotes.push({host: this.config_daemon.remote_host, port: this.config_daemon.remote_port})
-            this.$gateway.send("core", "change_remotes", remotes);
+            if (check) { return }
+            remotes.push({ host: this.config_daemon.remote_host, port: this.config_daemon.remote_port })
+            this.$gateway.send("core", "change_remotes", remotes)
             this.remotes = remotes
         },
-        selectPath(type) {
+        selectPath (type) {
             const fileInput = type === "data" ? "fileInputData" : "fileInputWallet"
             this.$refs[fileInput].click()
         },
-        setDataPath(file) {
+        setDataPath (file) {
             if (file.target.files && file.target.files.length > 0) {
                 this.config.app.data_dir = file.target.files[0].path
             }
         },
-        setWalletDataPath(file) {
+        setWalletDataPath (file) {
             if (file.target.files && file.target.files.length > 0) {
                 this.config.app.wallet_data_dir = file.target.files[0].path
             }
         },
-        setPreset(option) {
-            if (!option) return;
+        setPreset (option) {
+            if (!option) return
 
-            const {host, port} = option;
-            if (host) this.config_daemon.remote_host = host;
-            if (port) this.config_daemon.remote_port = port;
+            const { host, port } = option
+            if (host) this.config_daemon.remote_host = host
+            if (port) this.config_daemon.remote_port = port
         },
-        toString(value) {
+        asString (value) {
             if (!value && typeof value !== "number") return ""
-            return String(value);
+            return String(value)
         }
     },
-    data() {
+    data () {
         return {
             select: 0,
             remotes: []

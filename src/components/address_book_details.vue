@@ -11,7 +11,7 @@
                 Edit address book entry
             </q-toolbar-title>
 
-            <q-btn v-if="mode=='edit'" color="red flat no-ripple @click="cancelEdit()" label="Cancel" />
+            <q-btn v-if="mode=='edit'" color="red flat no-ripple" @click="cancelEdit()" label="Cancel" />
             <q-btn class="q-ml-sm" color="primary" @click="save()" label="Save" />
 
         </q-toolbar>
@@ -90,8 +90,6 @@
                                :extra="entry.description ? 'Notes: '+entry.description : ''"
                                />
 
-
-
                 <div class="q-mt-lg">
 
                     <div class="non-selectable">
@@ -108,13 +106,12 @@
         </div>
     </q-modal-layout>
 
-
 </q-modal>
 </template>
 
 <script>
 import { mapState } from "vuex"
-import Identicon from "components/identicon"
+// import Identicon from "components/identicon"
 import AddressHeader from "components/address_header"
 import TxList from "components/tx_list"
 import tritonField from "components/triton_field"
@@ -144,23 +141,23 @@ export default {
             return this.$store.getters["gateway/isReady"]
         },
         address_placeholder (state) {
-            const wallet = state.gateway.wallet.info;
-            const prefix = (wallet && wallet.address && wallet.address[0]) || "L";
-            return `${prefix}..`;
+            const wallet = state.gateway.wallet.info
+            const prefix = (wallet && wallet.address && wallet.address[0]) || "L"
+            return `${prefix}..`
         }
     }),
     validations: {
         newEntry: {
             address: {
                 required,
-                isAddress(value) {
-                    if (value === '') return true
+                isAddress (value) {
+                    if (value === "") return true
 
                     return new Promise(resolve => {
                         address(value, this.$gateway)
                             .then(() => resolve(true))
                             .catch(e => resolve(false))
-                    });
+                    })
                 }
             },
             payment_id: { payment_id }
@@ -197,7 +194,7 @@ export default {
         },
         sendToAddress () {
             this.close()
-            this.$router.replace({ path: "send", query: {address: this.entry.address, payment_id: this.entry.payment_id} });
+            this.$router.replace({ path: "send", query: { address: this.entry.address, payment_id: this.entry.payment_id } })
         },
         edit () {
             this.mode = "edit"
@@ -205,7 +202,7 @@ export default {
         },
         cancelEdit () {
             this.mode = "view"
-            this.$v.$reset();
+            this.$v.$reset()
             this.newEntry = {
                 index: false,
                 address: "",
@@ -217,7 +214,7 @@ export default {
         },
         close () {
             this.isVisible = false
-            this.$v.$reset();
+            this.$v.$reset()
             this.newEntry = {
                 index: false,
                 address: "",
@@ -231,7 +228,7 @@ export default {
 
     components: {
         AddressHeader,
-        Identicon,
+        // Identicon,
         TxList,
         tritonField
     }

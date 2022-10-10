@@ -66,7 +66,7 @@
 <script>
 const { clipboard } = require("electron")
 import { mapState } from "vuex"
-import Identicon from "components/identicon"
+// import Identicon from "components/identicon"
 import AddressBookDetails from "components/address_book_details"
 export default {
     computed: mapState({
@@ -78,7 +78,7 @@ export default {
             return this.$store.getters["gateway/isReady"]
         },
         address_book_combined (state) {
-            const starred = this.address_book_starred.map(a => ({ ...a, starred: true }));
+            const starred = this.address_book_starred.map(a => ({ ...a, starred: true }))
             return [
                 ...starred,
                 ...this.address_book
@@ -98,24 +98,24 @@ export default {
         },
         sendToAddress (address, event) {
             event.stopPropagation()
-            for(let i = 0; i < event.path.length; i++) {
-                if(event.path[i].tagName == "BUTTON") {
+            for (let i = 0; i < event.path.length; i++) {
+                if (event.path[i].tagName === "BUTTON") {
                     event.path[i].blur()
                     break
                 }
             }
-            this.$router.replace({ path: "send", query: {address: address.address, payment_id: address.payment_id} });
+            this.$router.replace({ path: "send", query: { address: address.address, payment_id: address.payment_id } })
         },
         copyAddress (entry, event) {
             event.stopPropagation()
-            for(let i = 0; i < event.path.length; i++) {
-                if(event.path[i].tagName == "BUTTON") {
+            for (let i = 0; i < event.path.length; i++) {
+                if (event.path[i].tagName === "BUTTON") {
                     event.path[i].blur()
                     break
                 }
             }
             clipboard.writeText(entry.address)
-            if(entry.payment_id) {
+            if (entry.payment_id) {
                 this.$q.dialog({
                     title: "Copy address",
                     message: "There is a payment id associated with this address.\nBe sure to copy the payment id separately.",
@@ -123,7 +123,7 @@ export default {
                         label: "OK",
                         color: "positive"
 
-                    },
+                    }
                 }).then(password => {
                     this.$q.notify({
                         type: "positive",
@@ -148,7 +148,7 @@ export default {
 
     },
     components: {
-        Identicon,
+        // Identicon,
         AddressBookDetails
     }
 }
@@ -166,7 +166,7 @@ export default {
         padding-top: 12px;
         padding-bottom: 12px;
 
-        .q-item-sublabel,  {
+        .q-item-sublabel  {
             font-size: 14px;
         }
 

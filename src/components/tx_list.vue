@@ -122,7 +122,7 @@ export default {
     watch: {
         wallet_height: {
             handler (val, old) {
-                if (val == old) return
+                if (val === old) return
                 this.filterTxList()
                 this.pageTxList()
             }
@@ -130,7 +130,7 @@ export default {
         tx_list: {
             handler (val, old) {
                 // Check if anything changed in the tx list
-                if (val.length == old.length) {
+                if (val.length === old.length) {
                     const changed = val.filter((v, i) => v.note !== old[i].note)
                     if (changed.length === 0) return
                 }
@@ -140,7 +140,7 @@ export default {
         },
         type: {
             handler (val, old) {
-                if (val == old) return
+                if (val === old) return
                 if (this.$refs.scroller) {
                     this.$refs.scroller.stop()
                     this.page = 0
@@ -153,7 +153,7 @@ export default {
         },
         txid: {
             handler (val, old) {
-                if (val == old) return
+                if (val === old) return
                 if (this.$refs.scroller) {
                     this.$refs.scroller.stop()
                     this.page = 0
@@ -231,7 +231,7 @@ export default {
                 }
 
                 if (this.toIncomingAddressIndex !== -1) {
-                    valid = tx.hasOwnProperty("subaddr_index") && tx.subaddr_index.minor == this.toIncomingAddressIndex
+                    valid = tx.hasOwnProperty("subaddr_index") && tx.subaddr_index.minor === this.toIncomingAddressIndex
                     return valid
                 }
 
@@ -259,13 +259,13 @@ export default {
         formatHeight (tx) {
             let height = tx.height
             let confirms = Math.max(0, this.wallet_height - height)
-            if (height == 0) { return "Pending" }
-            if (confirms < Math.max(10, tx.unlock_time - height)) { return `Height: ${height} (${confirms} confirm${confirms == 1 ? "" : "s"})` } else { return `Height: ${height} (confirmed)` }
+            if (height === 0) { return "Pending" }
+            if (confirms < Math.max(10, tx.unlock_time - height)) { return `Height: ${height} (${confirms} confirm${confirms === 1 ? "" : "s"})` } else { return `Height: ${height} (confirmed)` }
         },
         copyTxid (txid, event) {
             event.stopPropagation()
             for (let i = 0; i < event.path.length; i++) {
-                if (event.path[i].tagName == "BUTTON") {
+                if (event.path[i].tagName === "BUTTON") {
                     event.path[i].blur()
                     break
                 }

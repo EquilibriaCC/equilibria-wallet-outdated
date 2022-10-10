@@ -101,7 +101,6 @@
 
                     </div>
 
-
                 </div>
                 <div class="hr-separator"/>
                 <keep-alive>
@@ -116,10 +115,10 @@
 </template>
 
 <script>
-const {clipboard} = require("electron")
-import {openURL} from "quasar"
-import {mapState} from "vuex"
-import WalletDetails from "components/wallet_details"
+// const { clipboard } = require("electron")
+import { openURL } from "quasar"
+import { mapState } from "vuex"
+// import WalletDetails from "components/wallet_details"
 import Formattriton from "components/format_triton"
 import WalletSettings from "components/wallet_settings"
 import StatusFooter from "components/footer"
@@ -129,31 +128,34 @@ export default {
     name: "LayoutDefault",
     computed: mapState({
         theme: state => state.gateway.app.config.appearance.theme,
-        info: state => state.gateway.wallet.info,
+        info: state => state.gateway.wallet.info
     }),
-    data() {
+    data () {
         return {
             selectedTab: "tab-1",
             price: 0
 
         }
     },
-    mounted() {
-        fetch("https://api.coingecko.com/api/v3/coins/equilibria?tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false\n")
+    mounted () {
+        fetch("https://api.coingecko.com/api/v3/coins/triton?tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false\n")
             .then(response => response.json())
             .then(data => {
-                console.log(data.market_data.current_price.usd)
-                this.price = data.market_data.current_price.usd
+                if (data && data.error) {
+                    this.price = 0
+                } else {
+                    this.price = data.market_data.current_price.usd
+                }
                 this.$forceUpdate()
-            });
+            })
     },
     methods: {
-        openURL,
+        openURL
     },
     components: {
         StatusFooter,
         MainMenu,
-        WalletDetails,
+        // WalletDetails,
         WalletSettings,
         Formattriton
     }

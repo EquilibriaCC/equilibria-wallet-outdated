@@ -186,14 +186,14 @@
 </template>
 
 <script>
-import axios from 'axios'
+import axios from "axios"
 import { mapState } from "vuex"
 import { required, decimal } from "vuelidate/lib/validators"
 import { payment_id, address, greater_than_zero } from "src/validators/common"
-import Identicon from "components/identicon"
+// import Identicon from "components/identicon"
 import tritonField from "components/triton_field"
 import WalletPassword from "src/mixins/wallet_password"
-const objectAssignDeep = require("object-assign-deep");
+const objectAssignDeep = require("object-assign-deep")
 
 export default {
     computed: mapState({
@@ -208,12 +208,11 @@ export default {
             return this.$store.getters["gateway/isAbleToSend"]
         },
         address_placeholder (state) {
-            const wallet = state.gateway.wallet.info;
-            const prefix = (wallet && wallet.address && wallet.address[0]) || "L";
-            return `${prefix}..`;
+            const wallet = state.gateway.wallet.info
+            const prefix = (wallet && wallet.address && wallet.address[0]) || "L"
+            return `${prefix}..`
         }
     }),
-
 
     data () {
         return {
@@ -232,36 +231,36 @@ export default {
                 }
             },
             priorityOptions: [
-                {label: "Automatic", value: 0},
-                {label: "Slow", value: 1},
-                {label: "Normal", value: 2},
-                {label: "Fast", value: 3},
-                {label: "Fastest", value: 4},
+                { label: "Automatic", value: 0 },
+                { label: "Slow", value: 1 },
+                { label: "Normal", value: 2 },
+                { label: "Fast", value: 3 },
+                { label: "Fastest", value: 4 }
             ],
             currencyOptions: [
-              {label: "USD", value: 0},
-              {label: "AUD", value: 1},
-              {label: "BRL", value: 2},
-              {label: "CAD", value: 3},
-              {label: "CHF", value: 4},
-              {label: "CLP", value: 5},
-              {label: "CNY", value: 6},
-              {label: "DKK", value: 7},
-              {label: "EUR", value: 8},
-              {label: "GBP", value: 9},
-              {label: "HKD", value: 10},
-              {label: "INR", value: 11},
-              {label: "ISK", value: 12},
-              {label: "JPY", value: 13},
-              {label: "KRW", value: 14},
-              {label: "NZD", value: 15},
-              {label: "PLN", value: 16},
-              {label: "RUB", value: 17},
-              {label: "SEK", value: 18},
-              {label: "SGD", value: 19},
-              {label: "THB", value: 20},
-              {label: "TWD", value: 21},
-            ],
+                { label: "USD", value: 0 },
+                { label: "AUD", value: 1 },
+                { label: "BRL", value: 2 },
+                { label: "CAD", value: 3 },
+                { label: "CHF", value: 4 },
+                { label: "CLP", value: 5 },
+                { label: "CNY", value: 6 },
+                { label: "DKK", value: 7 },
+                { label: "EUR", value: 8 },
+                { label: "GBP", value: 9 },
+                { label: "HKD", value: 10 },
+                { label: "INR", value: 11 },
+                { label: "ISK", value: 12 },
+                { label: "JPY", value: 13 },
+                { label: "KRW", value: 14 },
+                { label: "NZD", value: 15 },
+                { label: "PLN", value: 16 },
+                { label: "RUB", value: 17 },
+                { label: "SEK", value: 18 },
+                { label: "SGD", value: 19 },
+                { label: "THB", value: 20 },
+                { label: "TWD", value: 21 }
+            ]
         }
     },
     validations: {
@@ -272,15 +271,15 @@ export default {
                 greater_than_zero
             },
             address: {
-            required,
-            isAddress(value) {
-                    if (value === '') return true
+                required,
+                isAddress (value) {
+                    if (value === "") return true
 
                     return new Promise(resolve => {
                         address(value, this.$gateway)
                             .then(() => resolve(true))
                             .catch(e => resolve(false))
-                    });
+                    })
                 }
             },
             payment_id: { payment_id }
@@ -288,71 +287,69 @@ export default {
     },
     watch: {
         tx_status: {
-            handler(val, old){
-                if(val.code == old.code) return
-                switch(this.tx_status.code) {
-                    case 0:
-                        this.$q.dialog({
-                            title: "Confirm Fee",
-                            message: this.tx_status.message,
-                            ok: {
-                                label: "OK",
-                                color: "positive"
+            handler (val, old) {
+                if (val.code === old.code) return
+                switch (this.tx_status.code) {
+                case 0:
+                    this.$q.dialog({
+                        title: "Confirm Fee",
+                        message: this.tx_status.message,
+                        ok: {
+                            label: "OK",
+                            color: "positive"
 
-                            },
-                            cancel: {
-                                flat: true,
-                                label: "CANCEL",
-                                color: "red"
-                            }
-                        }).then(() => {
-                            this.$gateway.send("wallet", "stake_confirm", {})
-
-                        }).catch(() => {
-                            this.$gateway.send("wallet", "stake_cancel", {})
-
-                        })
-
-                        break;
-                    case 1:
-                        this.$q.notify({
-                            type: "positive",
-                            timeout: 1000,
-                            message: this.tx_status.message
-                        })
-                        this.$v.$reset();
-                        this.newTx = {
-                            amount: 0,
-                            address: "",
-                            payment_id: "",
-                            priority: 0,
-                            address_book: {
-                                save: false,
-                                name: "",
-                                description: ""
-                            },
-                            note: ""
+                        },
+                        cancel: {
+                            flat: true,
+                            label: "CANCEL",
+                            color: "red"
                         }
-                        break
-                    case -1:
-                        this.$q.notify({
-                            type: "negative",
-                            timeout: 1000,
-                            message: this.tx_status.message
-                        })
-                        break;
+                    }).then(() => {
+                        this.$gateway.send("wallet", "stake_confirm", {})
+                    }).catch(() => {
+                        this.$gateway.send("wallet", "stake_cancel", {})
+                    })
+
+                    break
+                case 1:
+                    this.$q.notify({
+                        type: "positive",
+                        timeout: 1000,
+                        message: this.tx_status.message
+                    })
+                    this.$v.$reset()
+                    this.newTx = {
+                        amount: 0,
+                        address: "",
+                        payment_id: "",
+                        priority: 0,
+                        address_book: {
+                            save: false,
+                            name: "",
+                            description: ""
+                        },
+                        note: ""
+                    }
+                    break
+                case -1:
+                    this.$q.notify({
+                        type: "negative",
+                        timeout: 1000,
+                        message: this.tx_status.message
+                    })
+                    break
                 }
             },
             deep: true
         },
         $route (to) {
-            if(to.path == "/wallet/send" && to.query.hasOwnProperty("address")) {
+            if (to.path === "/wallet/send" && to.query.hasOwnProperty("address")) {
                 this.autoFill(to.query)
             }
         }
     },
     mounted () {
-        if(this.$route.path == "/wallet/send" && this.$route.query.hasOwnProperty("address")) {
+        if (this.$route.path === "/wallet/send" && this.$route.query.hasOwnProperty("address")) {
             this.autoFill(this.$route.query)
         }
     },
@@ -363,124 +360,122 @@ export default {
             this.newTx.payment_id = info.payment_id
         },
         getAmount: function () {
-            return this.newTx.amount;
+            return this.newTx.amount
         },
         // Conversion Function------------------------------------------------------------
-        //FROM WHAT EVER CURRENCY TO XTRI
+        // FROM WHAT EVER CURRENCY TO XTRI
         conversionToXtri: function () {
-            //xtri price in sats variable
-            let sats;
-            //btc prices in differnt currencies
-            let currentPrice;
-            let prices=[];
+            // xtri price in sats variable
+            let sats
+            // btc prices in differnt currencies
+            let currentPrice
+            let prices = []
 
-            //getting xtri price in sats from Trade Ogre
-            axios.get(`https://tradeogre.com/api/v1/ticker/BTC-XEQ`).then(res => {
-                console.log(res.data.price);
-                sats = res.data.price;
+            // getting xtri price in sats from Trade Ogre
+            axios.get("https://tradeogre.com/api/v1/ticker/BTC-XEQ").then(res => {
+                sats = res.data.price
 
-                //getting btc price in usd
-                axios.get(`https://blockchain.info/ticker`).then(res => {
-                    //btc prices in difffernt gov currencys
-                    prices[0] = res.data.USD["15m"];
-                    prices[1] = res.data.AUD["15m"];
-                    prices[2] = res.data.BRL["15m"];
-                    prices[3] = res.data.CAD["15m"];
-                    prices[4] = res.data.CHF["15m"];
-                    prices[5] = res.data.CLP["15m"];
-                    prices[6] = res.data.CNY["15m"];
-                    prices[7] = res.data.DKK["15m"];
-                    prices[8] = res.data.EUR["15m"];
-                    prices[9] = res.data.GBP["15m"];
-                    prices[10] = res.data.HKD["15m"];
-                    prices[11] = res.data.INR["15m"];
-                    prices[12] = res.data.ISK["15m"];
-                    prices[13] = res.data.JPY["15m"];
-                    prices[14] = res.data.KRW["15m"];
-                    prices[15] = res.data.NZD["15m"];
-                    prices[16] = res.data.PLN["15m"];
-                    prices[17] = res.data.RUB["15m"];
-                    prices[18] = res.data.SEK["15m"];
-                    prices[19] = res.data.SGD["15m"];
-                    prices[20] = res.data.THB["15m"];
-                    prices[21] = res.data.TWD["15m"];
+                // getting btc price in usd
+                axios.get("https://blockchain.info/ticker").then(res => {
+                    // btc prices in difffernt gov currencys
+                    prices[0] = res.data.USD["15m"]
+                    prices[1] = res.data.AUD["15m"]
+                    prices[2] = res.data.BRL["15m"]
+                    prices[3] = res.data.CAD["15m"]
+                    prices[4] = res.data.CHF["15m"]
+                    prices[5] = res.data.CLP["15m"]
+                    prices[6] = res.data.CNY["15m"]
+                    prices[7] = res.data.DKK["15m"]
+                    prices[8] = res.data.EUR["15m"]
+                    prices[9] = res.data.GBP["15m"]
+                    prices[10] = res.data.HKD["15m"]
+                    prices[11] = res.data.INR["15m"]
+                    prices[12] = res.data.ISK["15m"]
+                    prices[13] = res.data.JPY["15m"]
+                    prices[14] = res.data.KRW["15m"]
+                    prices[15] = res.data.NZD["15m"]
+                    prices[16] = res.data.PLN["15m"]
+                    prices[17] = res.data.RUB["15m"]
+                    prices[18] = res.data.SEK["15m"]
+                    prices[19] = res.data.SGD["15m"]
+                    prices[20] = res.data.THB["15m"]
+                    prices[21] = res.data.TWD["15m"]
 
-                    currentPrice = prices[this.newTx.currency];
+                    currentPrice = prices[this.newTx.currency]
 
-                    //Do conversion with current currency
-                    this.newTx.amount = ((this.newTx.amountInCurrency/currentPrice)/sats).toFixed(4);
-                    })
-                });
-
-            return 1;
-        },
-        //FROM XTRI TO WHAT EVER CURRENCY
-        conversionFromXtri: function () {
-            //xtri price in sats variable
-            let sats;
-            //btc prices in differnt currencies
-            let currentPrice;
-            let prices=[];
-
-            //getting xtri price in sats from Trade Ogre
-            axios.get(`https://tradeogre.com/api/v1/ticker/BTC-XEQ`).then(res => {
-                console.log(res.data.price);
-                sats = res.data.price;
-
-                //getting btc price in usd
-                axios.get(`https://blockchain.info/ticker`).then(res => {
-                    //btc prices in difffernt gov currencys
-                    prices[0] = res.data.USD["15m"];
-                    prices[1] = res.data.AUD["15m"];
-                    prices[2] = res.data.BRL["15m"];
-                    prices[3] = res.data.CAD["15m"];
-                    prices[4] = res.data.CHF["15m"];
-                    prices[5] = res.data.CLP["15m"];
-                    prices[6] = res.data.CNY["15m"];
-                    prices[7] = res.data.DKK["15m"];
-                    prices[8] = res.data.EUR["15m"];
-                    prices[9] = res.data.GBP["15m"];
-                    prices[10] = res.data.HKD["15m"];
-                    prices[11] = res.data.INR["15m"];
-                    prices[12] = res.data.ISK["15m"];
-                    prices[13] = res.data.JPY["15m"];
-                    prices[14] = res.data.KRW["15m"];
-                    prices[15] = res.data.NZD["15m"];
-                    prices[16] = res.data.PLN["15m"];
-                    prices[17] = res.data.RUB["15m"];
-                    prices[18] = res.data.SEK["15m"];
-                    prices[19] = res.data.SGD["15m"];
-                    prices[20] = res.data.THB["15m"];
-                    prices[21] = res.data.TWD["15m"];
-
-                    currentPrice = prices[this.newTx.currency];
-
-                    //Do conversion with current currency
-                    this.newTx.amountInCurrency = ((this.newTx.amount*currentPrice)*sats).toFixed(4);
+                    // Do conversion with current currency
+                    this.newTx.amount = ((this.newTx.amountInCurrency / currentPrice) / sats).toFixed(4)
                 })
-            });
+            })
 
-            return 1;
+            return 1
+        },
+        // FROM XTRI TO WHAT EVER CURRENCY
+        conversionFromXtri: function () {
+            // xtri price in sats variable
+            let sats
+            // btc prices in differnt currencies
+            let currentPrice
+            let prices = []
+
+            // getting xtri price in sats from Trade Ogre
+            axios.get("https://tradeogre.com/api/v1/ticker/BTC-XEQ").then(res => {
+                sats = res.data.price
+
+                // getting btc price in usd
+                axios.get("https://blockchain.info/ticker").then(res => {
+                    // btc prices in difffernt gov currencys
+                    prices[0] = res.data.USD["15m"]
+                    prices[1] = res.data.AUD["15m"]
+                    prices[2] = res.data.BRL["15m"]
+                    prices[3] = res.data.CAD["15m"]
+                    prices[4] = res.data.CHF["15m"]
+                    prices[5] = res.data.CLP["15m"]
+                    prices[6] = res.data.CNY["15m"]
+                    prices[7] = res.data.DKK["15m"]
+                    prices[8] = res.data.EUR["15m"]
+                    prices[9] = res.data.GBP["15m"]
+                    prices[10] = res.data.HKD["15m"]
+                    prices[11] = res.data.INR["15m"]
+                    prices[12] = res.data.ISK["15m"]
+                    prices[13] = res.data.JPY["15m"]
+                    prices[14] = res.data.KRW["15m"]
+                    prices[15] = res.data.NZD["15m"]
+                    prices[16] = res.data.PLN["15m"]
+                    prices[17] = res.data.RUB["15m"]
+                    prices[18] = res.data.SEK["15m"]
+                    prices[19] = res.data.SGD["15m"]
+                    prices[20] = res.data.THB["15m"]
+                    prices[21] = res.data.TWD["15m"]
+
+                    currentPrice = prices[this.newTx.currency]
+
+                    // Do conversion with current currency
+                    this.newTx.amountInCurrency = ((this.newTx.amount * currentPrice) * sats).toFixed(4)
+                })
+            })
+
+            return 1
         },
 
         send: function () {
             this.$v.newTx.$touch()
 
-            if(this.newTx.amount < 0) {
+            if (this.newTx.amount < 0) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
                     message: "Amount cannot be negative"
                 })
                 return
-            } else if(this.newTx.amount == 0) {
+            } else if (this.newTx.amount === 0) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
                     message: "Amount must be greater than zero"
                 })
                 return
-            } else if(this.newTx.amount > this.unlocked_balance / 1e4) {
+            } else if (this.newTx.amount > this.unlocked_balance / 1e4) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
@@ -495,7 +490,6 @@ export default {
                 })
                 return
             }
-
 
             if (this.$v.newTx.address.$error) {
                 this.$q.notify({
@@ -522,14 +516,14 @@ export default {
                     label: "Check Fee",
                     color: "positive"
 
-                },
+                }
             }).then(password => {
                 this.$store.commit("gateway/set_tx_status", {
                     code: 1,
                     message: "Sending transaction",
                     sending: true
                 })
-                const newTx = objectAssignDeep.noMutate(this.newTx, {password})
+                const newTx = objectAssignDeep.noMutate(this.newTx, { password })
                 this.$gateway.send("wallet", "transfer", newTx)
             }).catch(() => {
             })
@@ -537,7 +531,7 @@ export default {
     },
     mixins: [WalletPassword],
     components: {
-        Identicon,
+        // Identicon,
         tritonField
     }
 }

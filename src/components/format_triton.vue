@@ -18,8 +18,7 @@ export default {
     computed: {
         value () {
             let value = this.amount / 1e4
-            if(this.round)
-                value = value.toFixed(2)
+            if (this.round) { value = value.toFixed(2) }
             return value.toLocaleString()
         }
 

@@ -14,12 +14,12 @@ import ServiceNodeRegistration from "components/service_node_registration"
 export default {
     data () {
         return {
-            screen: "staking",
+            screen: "staking"
         }
     },
     components: {
         // ServiceNodeStaking,
-        ServiceNodeRegistration,
+        ServiceNodeRegistration
         // ServiceNodeUnlock
     }
 }

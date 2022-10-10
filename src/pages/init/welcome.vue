@@ -48,19 +48,19 @@
 </template>
 
 <script>
-import {version, daemonVersion} from "../../../package.json"
-import {mapState} from "vuex"
+import { version, daemonVersion } from "../../../package.json"
+import { mapState } from "vuex"
 import SettingsGeneral from "components/settings_general"
 
 export default {
     computed: mapState({
         theme: state => state.gateway.app.config.appearance.theme,
         pending_config: state => state.gateway.app.pending_config,
-        config_daemon(state) {
+        config_daemon (state) {
             return this.pending_config.daemons[this.pending_config.app.net_type]
-        },
+        }
     }),
-    data() {
+    data () {
         return {
             is_first_page: true,
             choose_lang: "EN",
@@ -68,8 +68,7 @@ export default {
             daemonVersion: ""
         }
     },
-    mounted() {
-
+    mounted () {
         this.version = version
         this.daemonVersion = daemonVersion
 
@@ -78,23 +77,23 @@ export default {
             status: {
                 code: 2 // Loading config
             }
-        });
+        })
     },
     methods: {
-        onStep() {
+        onStep () {
             this.is_first_page = this.$refs.stepper.steps[0].active
         },
-        clickNext() {
-            if(this.$refs.stepper.steps[this.$refs.stepper.length-1].active) {
-            this.$gateway.send("core", "save_config_init", this.pending_config);
-            this.$router.replace({path: "/"});
+        clickNext () {
+            if (this.$refs.stepper.steps[this.$refs.stepper.length - 1].active) {
+                this.$gateway.send("core", "save_config_init", this.pending_config)
+                this.$router.replace({ path: "/" })
             } else {
-                this.$refs.stepper.next();
+                this.$refs.stepper.next()
             }
         },
-        clickPrev() {
-            this.$refs.stepper.previous();
-        },
+        clickPrev () {
+            this.$refs.stepper.previous()
+        }
     },
     components: {
         SettingsGeneral
@@ -124,7 +123,6 @@ export default {
     padding: 10px 30px 10px 20px;
     border: 1px solid #ccc;
     cursor: pointer;
-
 
     .language-item-circle {
         background: #cc90e2;

@@ -27,7 +27,7 @@
 </template>
 
 <script>
-const objectAssignDeep = require("object-assign-deep");
+// const objectAssignDeep = require("object-assign-deep")
 import { mapState } from "vuex"
 import { required } from "vuelidate/lib/validators"
 import tritonField from "components/triton_field"
@@ -37,11 +37,11 @@ export default {
     name: "ServiceNodeRegistration",
     computed: mapState({
         theme: state => state.gateway.app.config.appearance.theme,
-        registration_status: state => state.gateway.service_node_status.registration,
+        registration_status: state => state.gateway.service_node_status.registration
     }),
     data () {
         return {
-            registration_string: "",
+            registration_string: ""
         }
     },
     validations: {
@@ -49,32 +49,32 @@ export default {
     },
     watch: {
         registration_status: {
-            handler(val, old){
-                if(val.code == old.code) return
-                switch(this.registration_status.code) {
-                    case 0:
-                        this.$q.notify({
-                            type: "positive",
-                            timeout: 1000,
-                            message: this.registration_status.message
-                        })
-                        this.$v.$reset();
-                        this.registration_string = ""
-                        break;
-                    case -1:
-                        this.$q.notify({
-                            type: "negative",
-                            timeout: 3000,
-                            message: this.registration_status.message
-                        })
-                        break;
+            handler (val, old) {
+                if (val.code === old.code) return
+                switch (this.registration_status.code) {
+                case 0:
+                    this.$q.notify({
+                        type: "positive",
+                        timeout: 1000,
+                        message: this.registration_status.message
+                    })
+                    this.$v.$reset()
+                    this.registration_string = ""
+                    break
+                case -1:
+                    this.$q.notify({
+                        type: "negative",
+                        timeout: 3000,
+                        message: this.registration_status.message
+                    })
+                    break
                 }
             },
             deep: true
-        },
+        }
     },
     methods: {
-        register: function() {
+        register: function () {
             this.$v.registration_string.$touch()
 
             if (this.$v.registration_string.$error) {
@@ -93,7 +93,7 @@ export default {
                     label: "REGISTER",
                     color: "positive"
 
-                },
+                }
             }).then(password => {
                 this.$store.commit("gateway/set_snode_status", {
                     registration: {
@@ -108,7 +108,6 @@ export default {
                 })
             }).catch(() => {
             })
-
         }
     },
     mixins: [WalletPassword],

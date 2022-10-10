@@ -51,7 +51,7 @@ export default {
             default: true,
             required: false
         }
-    },
+    }
 }
 </script>
 

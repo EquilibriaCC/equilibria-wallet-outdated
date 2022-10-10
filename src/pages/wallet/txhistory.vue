@@ -3,7 +3,6 @@
 
     <div class="row q-pt-sm q-mx-md q-mb-sm items-end non-selectable">
 
-
 <!--            <tritonField class="col-3 q-px-sm " label="Balances">-->
 <!--                <div style="  display: grid;grid-template-columns: 1fr 2fr">-->
 <!--                    <p style="text-align: center; margin-top: auto">-->
@@ -14,7 +13,6 @@
 <!--                    </p>-->
 <!--                </div>-->
 <!--            </tritonField>-->
-
 
         <tritonField class="col-10 " label="Filter by txid">
             <q-input v-model="tx_txid"
@@ -53,14 +51,14 @@ export default {
             tx_type: "all",
             tx_txid: "",
             tx_type_options: [
-                {label: "All", value: "all"},
-                {label: "Incoming", value: "in"},
-                {label: "Outgoing", value: "out"},
-                {label: "Pending", value: "all_pending"},
-                {label: "Miner", value: "miner"},
-                {label: "Service Node", value: "snode"},
-                {label: "Stake", value: "stake"},
-                {label: "Failed", value: "failed"},
+                { label: "All", value: "all" },
+                { label: "Incoming", value: "in" },
+                { label: "Outgoing", value: "out" },
+                { label: "Pending", value: "all_pending" },
+                { label: "Miner", value: "miner" },
+                { label: "Service Node", value: "snode" },
+                { label: "Stake", value: "stake" },
+                { label: "Failed", value: "failed" }
             ]
 
         }

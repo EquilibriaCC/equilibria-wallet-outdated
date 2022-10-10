@@ -23,7 +23,7 @@
     <q-context-menu>
         <q-list link separator style="min-width: 150px; max-height: 300px;">
             <q-item v-close-overlay
-                    @click.native="copyAddress(address, $event)">
+                    @click.native="copyAddress(/*address, $event*/)">
                 <q-item-main label="Copy address" />
             </q-item>
         </q-list>
@@ -34,7 +34,7 @@
 
 <script>
 const { clipboard } = require("electron")
-import Identicon from "components/identicon"
+// import Identicon from "components/identicon"
 export default {
     name: "AddressHeader",
     props: {
@@ -67,14 +67,14 @@ export default {
         copyAddress () {
             this.$refs.copy.$el.blur()
             clipboard.writeText(this.address)
-            if(this.payment_id) {
+            if (this.payment_id) {
                 this.$q.dialog({
                     title: "Copy address",
                     message: "There is a payment id associated with this address.\nBe sure to copy the payment id separately.",
                     ok: {
                         label: "OK",
                         color: "positive"
-                    },
+                    }
                 }).then(() => {
                     this.$q.notify({
                         type: "positive",
@@ -95,10 +95,10 @@ export default {
                     message: "Address copied to clipboard"
                 })
             }
-        },
+        }
     },
     components: {
-        Identicon
+        // Identicon
     }
 }
 </script>

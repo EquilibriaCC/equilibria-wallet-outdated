@@ -28,7 +28,7 @@ import { mapState } from "vuex"
 export default {
     data () {
         return {
-            directory_state: [],
+            directory_state: []
         }
     },
     computed: mapState({
@@ -37,17 +37,17 @@ export default {
         old_gui_import_status: state => state.gateway.old_gui_import_status,
         selectOptions: state => [
             {
-                label: 'Main',
-                value: 'mainnet'
+                label: "Main",
+                value: "mainnet"
             },
             {
-                label: 'Staging',
-                value: 'stagenet'
+                label: "Staging",
+                value: "stagenet"
             },
             {
-                label: 'Test',
-                value: 'testnet'
-            },
+                label: "Test",
+                value: "testnet"
+            }
         ],
         selectedWallets () {
             return this.directory_state.filter(s => s.selected)
@@ -55,14 +55,14 @@ export default {
     }),
     watch: {
         directories: {
-            handler(val, old) {
+            handler (val, old) {
                 this.populate_state()
             },
             deep: true
         },
         old_gui_import_status: {
-            handler(val, old) {
-                if(val.code == old.code) return
+            handler (val, old) {
+                if (val.code === old.code) return
 
                 const { code, failed_wallets } = this.old_gui_import_status
 
@@ -70,7 +70,7 @@ export default {
                 if (code === 0) {
                     this.$q.loading.hide()
                     if (failed_wallets.length === 0) {
-                        this.$router.replace({ path: "/wallet-select" });
+                        this.$router.replace({ path: "/wallet-select" })
                     } else {
                         failed_wallets.forEach(wallet => {
                             this.$q.notify({
@@ -103,14 +103,14 @@ export default {
                         selected: false,
                         type: "mainnet"
                     })
-                });
+                })
 
             // Sort them
-            this.directory_state = new_state.sort(function(a, b){
-                return a.directory.localeCompare(b.directory);
+            this.directory_state = new_state.sort(function (a, b) {
+                return a.directory.localeCompare(b.directory)
             })
         },
-        import_wallets() {
+        import_wallets () {
             this.$q.loading.show({
                 delay: 0
             })
@@ -118,10 +118,10 @@ export default {
                 wallets: this.selectedWallets
             })
         },
-        cancel() {
-            this.$router.replace({ path: "/wallet-select" });
+        cancel () {
+            this.$router.replace({ path: "/wallet-select" })
         }
-    },
+    }
 }
 </script>
 

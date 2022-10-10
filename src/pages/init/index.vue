@@ -83,10 +83,10 @@
 </template>
 
 <script>
-import {mapState} from "vuex"
+import { mapState } from "vuex"
 
 export default {
-    data() {
+    data () {
         return {
             message: "",
             version: ""
@@ -99,81 +99,73 @@ export default {
         daemons: state => state.gateway.daemons
     }),
     methods: {
-        updateStatus() {
-            console.log(this.status.code)
+        updateStatus () {
             switch (this.status.code) {
-                case -1: // config not found, go to welcome screen
-                    this.$router.replace({path: "welcome"});
-                    break;
-                case 0: // start-up complete, go to wallet-select
-                    this.$router.replace({path: "wallet-select"});
-                    break;
-                case 1:
-                    this.message = "Connecting to backend"
-                    this.$refs.backend.className = "pulse"
-                    this.$refs.settings.className = "grey"
-                    this.$refs.daemon.className = "grey"
-                    this.$refs.wallet.className = "grey"
-                    break;
-                case 2:
-                    if (this.app.config.daemons.mainnet.type == "local") {
-                        this.message = "Loading settings"
-                    } else {
-                        this.message = "Loading settings and finding fastest remote node"
-                    }
-                    this.$refs.backend.className = "solid"
-                    this.$refs.settings.className = "pulse"
-                    this.$refs.daemon.className = "grey"
-                    this.$refs.wallet.className = "grey"
-                    break;
-                case 3:
-                    if (this.app.config.daemons.mainnet.type == "local") {
-                        this.message = "Connecting to local daemon"
-                    } else if (!this.app.scan) {
-                        console.log(this.daemons)
-                        this.message = "Connecting to " + this.daemons.mainnet.remote_host
-                    } else {
-                        this.message = "Connecting to " + this.remote
-                    }
-                    this.$refs.backend.className = "solid"
-                    this.$refs.settings.className = "solid2"
-                    this.$refs.daemon.className = "pulse"
-                    this.$refs.wallet.className = "grey"
-                    break;
-                case 4:
-                    this.version = this.status.message
-                    break;
-                case 5:
-                    this.$q.notify({
-                        type: "warning",
-                        timeout: 2000,
-                        message: "Warning: daemon not found, using remote node"
-                    })
-                    break;
-                case 6:
-                    this.message = "Starting wallet"
-                    this.$refs.backend.className = "solid"
-                    this.$refs.settings.className = "solid2"
-                    this.$refs.daemon.className = "solid"
-                    this.$refs.wallet.className = "pulse"
-                    break;
-                case 7:
-                    this.message = "Reading wallet list"
-                    this.$refs.backend.className = "solid"
-                    this.$refs.settings.className = "solid2"
-                    this.$refs.daemon.className = "solid"
-                    this.$refs.wallet.className = "solid2"
-                    break;
+            case -1: // config not found, go to welcome screen
+                this.$router.replace({ path: "welcome" })
+                break
+            case 0: // start-up complete, go to wallet-select
+                this.$router.replace({ path: "wallet-select" })
+                break
+            case 1:
+                this.message = "Connecting to backend"
+                this.$refs.backend.className = "pulse"
+                this.$refs.settings.className = "grey"
+                this.$refs.daemon.className = "grey"
+                this.$refs.wallet.className = "grey"
+                break
+            case 2:
+                this.$refs.backend.className = "solid"
+                this.$refs.settings.className = "pulse"
+                this.$refs.daemon.className = "grey"
+                this.$refs.wallet.className = "grey"
+                break
+            case 3:
+                // if (this.app.config.daemons.mainnet.type === "local") {
+                //     this.message = "Connecting to local daemon"
+                // } else if (!this.app.scan) {
+                //     this.message = `Connecting to ${this.daemons.mainnet.remote_host}`
+                // } else {
+                //     this.message = `Connecting to ${this.remote}`
+                // }
+                this.$refs.backend.className = "solid"
+                this.$refs.settings.className = "solid2"
+                this.$refs.daemon.className = "pulse"
+                this.$refs.wallet.className = "grey"
+                break
+            case 4:
+                this.version = this.status.message
+                break
+            case 5:
+                this.$q.notify({
+                    type: "warning",
+                    timeout: 2000,
+                    message: "Warning: daemon not found, using remote node"
+                })
+                break
+            case 6:
+                this.message = "Starting wallet"
+                this.$refs.backend.className = "solid"
+                this.$refs.settings.className = "solid2"
+                this.$refs.daemon.className = "solid"
+                this.$refs.wallet.className = "pulse"
+                break
+            case 7:
+                this.message = "Reading wallet list"
+                this.$refs.backend.className = "solid"
+                this.$refs.settings.className = "solid2"
+                this.$refs.daemon.className = "solid"
+                this.$refs.wallet.className = "solid2"
+                break
             }
         }
     },
-    mounted() {
-        console.log(this.$state)
+    mounted () {
         this.updateStatus()
     },
     watch: {
         status: {
-            handler() {
+            handler () {
                 this.updateStatus()
             },
             deep: true

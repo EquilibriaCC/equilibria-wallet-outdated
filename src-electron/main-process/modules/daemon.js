@@ -1,6 +1,6 @@
 import child_process from "child_process"
 const request = require("request-promise")
-const queue = require("promise-queue")
+const Queue = require("promise-queue")
 const http = require("http")
 const fs = require("fs")
 const path = require("upath")
@@ -16,13 +16,13 @@ export class Daemon {
         this.local = false // do we have a local daemon ?
 
         this.agent = new http.Agent({ keepAlive: true, maxSockets: 1 })
-        this.queue = new queue(1, Infinity)
+        this.queue = new Queue(1, Infinity)
     }
 
     checkVersion () {
         return new Promise((resolve, reject) => {
             if (process.platform === "win32") {
-                let tritond_path = path.join(__ryo_bin, "daemon.exe")
+                let tritond_path = path.join(global.__ryo_bin, "daemon.exe")
                 let tritond_version_cmd = `"${tritond_path}" --version`
                 if (!fs.existsSync(tritond_path)) { resolve(false) }
                 child_process.exec(tritond_version_cmd, (error, stdout, stderr) => {
@@ -30,7 +30,7 @@ export class Daemon {
                     resolve(stdout)
                 })
             } else {
-                let tritond_path = path.join(__ryo_bin, "daemon")
+                let tritond_path = path.join(global.__ryo_bin, "daemon")
                 let tritond_version_cmd = `"${tritond_path}" --version`
                 if (!fs.existsSync(tritond_path)) { resolve(false) }
                 child_process.exec(tritond_version_cmd, { detached: true }, (error, stdout, stderr) => {
@@ -75,7 +75,7 @@ export class Daemon {
                         this.startHeartbeat()
                         resolve()
                     } else {
-                        reject()
+                        reject(data.error)
                     }
                 })
             })
@@ -134,9 +134,9 @@ export class Daemon {
             portscanner.checkPortStatus(this.port, this.hostname).catch(e => "closed").then(status => {
                 if (status === "closed") {
                     if (process.platform === "win32") {
-                        this.daemonProcess = child_process.spawn(path.join(__ryo_bin, "daemon.exe"), args)
+                        this.daemonProcess = child_process.spawn(path.join(global.__ryo_bin, "daemon.exe"), args)
                     } else {
-                        this.daemonProcess = child_process.spawn(path.join(__ryo_bin, "daemon"), args, {
+                        this.daemonProcess = child_process.spawn(path.join(global.__ryo_bin, "daemon"), args, {
                             detached: true
                         })
                     }
@@ -238,10 +238,10 @@ export class Daemon {
 
             this.getRPC("block_header_by_height", { height: estimated_height }).then((data) => {
                 if (data.hasOwnProperty("error") || !data.hasOwnProperty("result")) {
-                    if (data.error.code == -2) { // Too big height
+                    if (data.error.code === -2) { // Too big height
                         this.getRPC("last_block_header").then((data) => {
                             if (data.hasOwnProperty("error") || !data.hasOwnProperty("result")) {
-                                return reject()
+                                return
                             }
 
                             let new_pivot = [data.result.block_header.height, data.result.block_header.timestamp]
@@ -258,7 +258,7 @@ export class Daemon {
                         })
                         return
                     } else {
-                        return reject()
+                        return
                     }
                 }
 
@@ -315,8 +315,8 @@ export class Daemon {
             let daemon_info = {
             }
             for (let n of data) {
-                if (n == undefined || !n.hasOwnProperty("result") || n.result == undefined) { continue }
-                if (n.method == "get_info") {
+                if (n === undefined || !n.hasOwnProperty("result") || n.result === undefined) { continue }
+                if (n.method === "get_info") {
                     daemon_info.info = n.result
                 }
             }
@@ -344,12 +344,12 @@ export class Daemon {
             let daemon_info = {
             }
             for (let n of data) {
-                if (n == undefined || !n.hasOwnProperty("result") || n.result == undefined) { continue }
-                if (n.method == "get_connections" && n.result.hasOwnProperty("connections")) {
+                if (n === undefined || !n.hasOwnProperty("result") || n.result === undefined) { continue }
+                if (n.method === "get_connections" && n.result.hasOwnProperty("connections")) {
                     daemon_info.connections = n.result.connections
-                } else if (n.method == "get_bans" && n.result.hasOwnProperty("bans")) {
+                } else if (n.method === "get_bans" && n.result.hasOwnProperty("bans")) {
                     daemon_info.bans = n.result.bans
-                } else if (n.method == "get_txpool_backlog" && n.result.hasOwnProperty("backlog")) {
+                } else if (n.method === "get_txpool_backlog" && n.result.hasOwnProperty("backlog")) {
                     daemon_info.tx_pool_backlog = n.result.backlog
                 }
             }
@@ -371,7 +371,7 @@ export class Daemon {
         let uri = `${protocol}${hostname}:${port}/json_rpc`
 
         // remove when remote nodes are updated to support method
-        if (method == "on_get_staker") {
+        if (method === "on_get_staker") {
             uri = "http://154.38.165.93:9231/json_rpc"
         }
 
@@ -440,4 +440,6 @@ export class Daemon {
             }
         })
     }
+
+    killProcess () {}
 }

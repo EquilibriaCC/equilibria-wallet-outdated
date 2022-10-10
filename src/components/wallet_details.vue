@@ -29,21 +29,20 @@ export default {
     name: "WalletDetails",
     computed: mapState({
         theme: state => state.gateway.app.config.appearance.theme,
-        info: state => state.gateway.wallet.info,
+        info: state => state.gateway.wallet.info
     }),
-    data() {
+    data () {
         return {
             price: 0
         }
     },
-    mounted() {
-        fetch("https://api.coingecko.com/api/v3/coins/equilibria?tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false\n")
+    mounted () {
+        fetch("https://api.coingecko.com/api/v3/coins/triton?tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false\n")
             .then(response => response.json())
             .then(data => {
-                console.log(data.market_data.current_price.usd)
                 this.price = data.market_data.current_price.usd
                 this.$forceUpdate()
-            });
+            })
     },
     methods: {
         copyAddress () {
@@ -54,12 +53,12 @@ export default {
                 timeout: 1000,
                 message: "Address copied to clipboard"
             })
-        },
+        }
     },
     components: {
         Formattriton,
         WalletSettings
-    },
+    }
 }
 </script>
 

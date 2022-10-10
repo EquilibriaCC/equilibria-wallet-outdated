@@ -23,7 +23,7 @@
 </template>
 
 <script>
-const objectAssignDeep = require("object-assign-deep");
+const objectAssignDeep = require("object-assign-deep")
 import { mapState } from "vuex"
 import { required } from "vuelidate/lib/validators"
 import { service_node_key } from "src/validators/common"
@@ -34,11 +34,11 @@ export default {
     name: "ServiceNodeUnlock",
     computed: mapState({
         theme: state => state.gateway.app.config.appearance.theme,
-        unlock_status: state => state.gateway.service_node_status.unlock,
+        unlock_status: state => state.gateway.service_node_status.unlock
     }),
     data () {
         return {
-            node_key: "",
+            node_key: ""
         }
     },
     validations: {
@@ -46,54 +46,54 @@ export default {
     },
     watch: {
         unlock_status: {
-            handler(val, old){
-                if(val.code == old.code) return
-                switch(this.unlock_status.code) {
-                    case 0:
-                        this.key = null
-                        this.password = null
+            handler (val, old) {
+                if (val.code === old.code) return
+                switch (this.unlock_status.code) {
+                case 0:
+                    this.key = null
+                    this.password = null
 
-                        this.$q.notify({
-                            type: "positive",
-                            timeout: 1000,
-                            message: this.unlock_status.message
-                        })
-                        this.$v.$reset();
-                        this.node_key = ""
-                        break;
-                    case 1:
-                        // Tell the user to confirm
-                         this.$q.dialog({
-                            title: "Confirm",
-                            message: this.unlock_status.message,
-                            ok: {
-                                label: "UNLOCK",
-                                color: "positive"
+                    this.$q.notify({
+                        type: "positive",
+                        timeout: 1000,
+                        message: this.unlock_status.message
+                    })
+                    this.$v.$reset()
+                    this.node_key = ""
+                    break
+                case 1:
+                    // Tell the user to confirm
+                    this.$q.dialog({
+                        title: "Confirm",
+                        message: this.unlock_status.message,
+                        ok: {
+                            label: "UNLOCK",
+                            color: "positive"
 
-                            },
-                            cancel: {
-                                flat: true,
-                                label: "CANCEL",
-                                color: "red"
-                            }
-                        }).then(() => {
-                            this.gatewayUnlock(this.password, this.key, true);
-                        }).catch(() => {})
-                        break;
-                    case -1:
-                        this.key = null
-                        this.password = null
+                        },
+                        cancel: {
+                            flat: true,
+                            label: "CANCEL",
+                            color: "red"
+                        }
+                    }).then(() => {
+                        this.gatewayUnlock(this.password, this.key, true)
+                    }).catch(() => {})
+                    break
+                case -1:
+                    this.key = null
+                    this.password = null
 
-                        this.$q.notify({
-                            type: "negative",
-                            timeout: 1000,
-                            message: this.unlock_status.message
-                        })
-                        break;
+                    this.$q.notify({
+                        type: "negative",
+                        timeout: 1000,
+                        message: this.unlock_status.message
+                    })
+                    break
                 }
             },
             deep: true
-        },
+        }
     },
     methods: {
         unlock: function () {
@@ -117,10 +117,10 @@ export default {
                     label: "UNLOCK",
                     color: "positive"
 
-                },
+                }
             }).then(password => {
                 this.password = password
-                this.gatewayUnlock(this.password, this.key, false);
+                this.gatewayUnlock(this.password, this.key, false)
             }).catch(() => {
             })
         },
@@ -137,7 +137,7 @@ export default {
                 service_node_key: key,
                 confirmed
             })
-        },
+        }
     },
 
     mixins: [WalletPassword],

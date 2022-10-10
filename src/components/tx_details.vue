@@ -73,13 +73,11 @@
 
             </div>
 
-
             <h6 class="q-mt-xs q-mb-none text-weight-light">Transaction id</h6>
             <p class="monospace break-all">{{ tx.txid }}</p>
 
             <h6 class="q-mt-xs q-mb-none text-weight-light">Payment id</h6>
             <p class="monospace break-all">{{ tx.payment_id ? tx.payment_id : 'N/A' }}</p>
-
 
             <div v-if="tx.type=='in' || tx.type=='pool'">
                 <q-list no-border>
@@ -107,7 +105,7 @@
                 <q-list no-border>
                     <q-list-header class="q-px-none">Outgoing transaction sent to:</q-list-header>
                     <template v-if="out_destinations">
-                        <q-item class="q-px-none" v-for="destination in out_destinations">
+                        <q-item class="q-px-none" v-for="(destination, index) in out_destinations" :key="index">
                             <q-item-main>
                                 <q-item-tile label>{{ destination.name }}</q-item-tile>
                                 <q-item-tile class="monospace ellipsis" sublabel>{{ destination.address }}</q-item-tile>
@@ -169,13 +167,13 @@ export default {
         in_tx_address_used (state) {
             let i
             let used_addresses = state.gateway.wallet.address_list.primary.concat(state.gateway.wallet.address_list.used)
-            for(i=0; i < used_addresses.length; i++) {
-                if(used_addresses[i].address_index == this.tx.subaddr_index.minor) {
+            for (i = 0; i < used_addresses.length; i++) {
+                if (used_addresses[i].address_index === this.tx.subaddr_index.minor) {
                     let address_index_text = ""
-                    if(used_addresses[i].address_index === 0) {
+                    if (used_addresses[i].address_index === 0) {
                         address_index_text = "Primary address"
                     } else {
-                        address_index_text = "Sub-address (Index: "+used_addresses[i].address_index+")"
+                        address_index_text = "Sub-address (Index: " + used_addresses[i].address_index + ")"
                     }
                     return {
                         address: used_addresses[i].address,
@@ -187,20 +185,19 @@ export default {
             return false
         },
         out_destinations (state) {
-            if(!this.tx.destinations)
-                return false
+            if (!this.tx.destinations) { return false }
             let i, j
             let destinations = []
             let address_book = state.gateway.wallet.address_list.address_book
-            for(i=0; i < this.tx.destinations.length; i++) {
+            for (i = 0; i < this.tx.destinations.length; i++) {
                 let destination = this.tx.destinations[i]
                 destination.name = ""
-                for(j=0; j < address_book.length; j++) {
-                    if(destination.address == address_book[j].address) {
-                        const { name, description} = address_book[j]
+                for (j = 0; j < address_book.length; j++) {
+                    if (destination.address === address_book[j].address) {
+                        const { name, description } = address_book[j]
                         const separator = description === "" ? "" : " - "
                         destination.name = `${name}${separator}${description}`
-                        break;
+                        break
                     }
                 }
                 destinations.push(destination)
@@ -223,11 +220,11 @@ export default {
                 height: 0,
                 note: "",
                 payment_id: "",
-                subaddr_index: {major: 0, minor: 0},
+                subaddr_index: { major: 0, minor: 0 },
                 timestamp: 0,
                 txid: "",
                 type: "",
-                unlock_time:0
+                unlock_time: 0
             }
         }
     },
@@ -238,31 +235,30 @@ export default {
                 message: JSON.stringify(this.tx, null, 2),
                 ok: {
                     label: "close",
-                    color: "positive",
-                },
+                    color: "positive"
+                }
             }).then(() => {
             }).catch(() => {
-            });
+            })
         },
         openExplorer () {
-            this.$gateway.send("core", "open_explorer", {type: "tx", id: this.tx.txid})
+            this.$gateway.send("core", "open_explorer", { type: "tx", id: this.tx.txid })
         },
         saveTxNotes () {
-
             this.$q.notify({
                 timeout: 1000,
                 type: "positive",
                 message: "Transaction notes saved"
             })
-            this.$gateway.send("wallet", "save_tx_notes", {txid: this.tx.txid, note: this.txNotes})
+            this.$gateway.send("wallet", "save_tx_notes", { txid: this.tx.txid, note: this.txNotes })
         },
         formatDate (timestamp) {
             return date.formatDate(timestamp, "YYYY-MM-DD hh:mm a")
         },
         copyAddress (address, event) {
             event.stopPropagation()
-            for(let i = 0; i < event.path.length; i++) {
-                if(event.path[i].tagName == "BUTTON") {
+            for (let i = 0; i < event.path.length; i++) {
+                if (event.path[i].tagName === "BUTTON") {
                     event.path[i].blur()
                     break
                 }

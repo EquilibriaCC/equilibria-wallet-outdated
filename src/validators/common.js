@@ -5,11 +5,11 @@ export const greater_than_zero = (input) => {
 }
 
 export const payment_id = (input) => {
-    return input.length === 0 || (/^[0-9A-Fa-f]+$/.test(input) && (input.length == 16 || input.length == 64))
+    return input.length === 0 || (/^[0-9A-Fa-f]+$/.test(input) && (input.length === 16 || input.length === 64))
 }
 
 export const privkey = (input) => {
-    return input.length === 0 || (/^[0-9A-Fa-f]+$/.test(input) && input.length == 64)
+    return input.length === 0 || (/^[0-9A-Fa-f]+$/.test(input) && input.length === 64)
 }
 
 export const service_node_key = (input) => {

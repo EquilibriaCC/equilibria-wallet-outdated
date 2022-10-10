@@ -212,8 +212,8 @@
 
 const { clipboard, nativeImage } = require("electron")
 import { mapState } from "vuex"
-import QrcodeVue from "qrcode.vue";
-import Identicon from "components/identicon"
+import QrcodeVue from "qrcode.vue"
+// import Identicon from "components/identicon"
 import AddressDetails from "components/address_details"
 
 export default {
@@ -223,11 +223,11 @@ export default {
     }),
     filters: {
         toString: function (value) {
-            if (typeof value !== "number") return "N/A";
-            return String(value);
+            if (typeof value !== "number") return "N/A"
+            return String(value)
         },
         currency: function (value) {
-            if (typeof value !== "number") return "N/A";
+            if (typeof value !== "number") return "N/A"
 
             const amount = value / 1e4
             return amount.toLocaleString()
@@ -244,13 +244,13 @@ export default {
         }
     },
     methods: {
-        showUnused() {
-          this.show = !this.show
-          this.$forceUpdate()
+        showUnused () {
+            this.show = !this.show
+            this.$forceUpdate()
         },
         details (address) {
-            this.$refs.addressDetails.address = address;
-            this.$refs.addressDetails.isVisible = true;
+            this.$refs.addressDetails.address = address
+            this.$refs.addressDetails.isVisible = true
         },
         showQR (address, event) {
             event.stopPropagation()
@@ -261,7 +261,7 @@ export default {
             const data = this.$refs.qr.$el.childNodes[0].toDataURL()
             const img = nativeImage.createFromDataURL(data)
             clipboard.writeImage(img)
-             this.$q.notify({
+            this.$q.notify({
                 type: "positive",
                 timeout: 1000,
                 message: "Copied QR code to clipboard"
@@ -269,12 +269,12 @@ export default {
         },
         saveQR () {
             let img = this.$refs.qr.$el.childNodes[0].toDataURL()
-            this.$gateway.send("core", "save_png", {img, type: "QR Code"})
+            this.$gateway.send("core", "save_png", { img, type: "QR Code" })
         },
         copyAddress (address, event) {
             event.stopPropagation()
-            for(let i = 0; i < event.path.length; i++) {
-                if(event.path[i].tagName == "BUTTON") {
+            for (let i = 0; i < event.path.length; i++) {
+                if (event.path[i].tagName === "BUTTON") {
                     event.path[i].blur()
                     break
                 }
@@ -288,7 +288,7 @@ export default {
         }
     },
     components: {
-        Identicon,
+        // Identicon,
         AddressDetails,
         QrcodeVue
     }

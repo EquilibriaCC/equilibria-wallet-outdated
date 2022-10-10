@@ -73,7 +73,7 @@ export default {
             default: false
         }
     },
-    data() {
+    data () {
         return {
             version: "",
             daemonVersion: ""
@@ -85,18 +85,15 @@ export default {
     },
     computed: mapState({
         theme: state => state.gateway.app.config.appearance.theme,
-        isRPCSyncing: state => state.gateway.wallet.isRPCSyncing,
+        isRPCSyncing: state => state.gateway.wallet.isRPCSyncing
 
     }),
     methods: {
         openExternal (url) {
-            this.$gateway.send("core", "open_url", {url})
+            this.$gateway.send("core", "open_url", { url })
         },
         showAbout (toggle) {
-            if(toggle)
-                this.$refs.aboutModal.show()
-            else
-                this.$refs.aboutModal.hide()
+            if (toggle) { this.$refs.aboutModal.show() } else { this.$refs.aboutModal.hide() }
         },
         openSettings () {
             this.$refs.settingsModal.isVisible = true
@@ -126,7 +123,7 @@ export default {
                     // short delay to prevent wallet data reaching the
                     // websocket moments after we close and reset data
                     this.$store.dispatch("gateway/resetWalletData")
-                }, 250);
+                }, 250)
             }).catch(() => {
             })
         },

@@ -1,7 +1,7 @@
-import {Daemon} from "./daemon"
-import {WalletRPC} from "./wallet-rpc"
-import {SCEE} from "./SCEE-Node"
-import {dialog} from "electron"
+import { Daemon } from "./daemon"
+import { WalletRPC } from "./wallet-rpc"
+import { SCEE } from "./SCEE-Node"
+import { dialog } from "electron"
 
 let fetch = require("isomorphic-unfetch")
 const WebSocket = require("ws")
@@ -9,10 +9,10 @@ const os = require("os")
 const fs = require("fs-extra")
 const path = require("upath")
 const objectAssignDeep = require("object-assign-deep")
-const execSync = require('child_process').execSync;
+const execSync = require("child_process").execSync
 
 export class Backend {
-    constructor(mainWindow) {
+    constructor (mainWindow) {
         this.mainWindow = mainWindow
         this.daemon = null
         this.walletd = null
@@ -25,7 +25,7 @@ export class Backend {
         this.scee = new SCEE()
     }
 
-    init(config) {
+    init (config) {
         if (os.platform() === "win32") {
             this.config_dir = "C:\\ProgramData\\equilibria"
             this.wallet_dir = `${os.homedir()}\\Documents\\equilibria`
@@ -35,11 +35,11 @@ export class Backend {
         }
 
         if (!fs.existsSync(this.config_dir)) {
-            fs.mkdirpSync(this.config_dir)
+            fs.mkdirSync(this.config_dir, { recursive: true })
         }
 
         if (!fs.existsSync(path.join(this.config_dir, "gui"))) {
-            fs.mkdirpSync(path.join(this.config_dir, "gui"))
+            fs.mkdirSync(path.join(this.config_dir, "gui"), { recursive: true })
         }
 
         this.config_file = path.join(this.config_dir, "gui", "config.json")
@@ -109,13 +109,12 @@ export class Backend {
                 theme: "dark"
             }
         }
-        //this is too long
-        if (this.config_data.app.scan == undefined) {
+        // this is too long
+        if (this.config_data.app.scan === undefined) {
             this.config_data.app.scan = false
         }
 
-
-        let remotes;
+        let remotes
         try {
             remotes = fs.readFileSync(path.join(this.config_dir, "gui", "remotes.json"), "utf8")
         } catch {
@@ -156,7 +155,7 @@ export class Backend {
         })
     }
 
-    send(event, data = {}) {
+    send (event, data = {}) {
         let message = {
             event,
             data
@@ -164,167 +163,171 @@ export class Backend {
 
         let encrypted_data = this.scee.encryptString(JSON.stringify(message), this.token)
 
-        this.wss.clients.forEach(function each(client) {
+        this.wss.clients.forEach(function each (client) {
             if (client.readyState === WebSocket.OPEN) {
                 client.send(encrypted_data)
             }
         })
     }
 
-    receive(data) {
+    receive (data) {
         let decrypted_data = JSON.parse(this.scee.decryptString(data, this.token))
 
         // route incoming request to either the daemon, wallet, or here
         switch (decrypted_data.module) {
-            case "core":
-                this.handle(decrypted_data)
-                break
-            case "daemon":
-                if (this.daemon) {
-                    this.daemon.handle(decrypted_data)
-                }
-                break
-            case "wallet":
-                if (this.walletd) {
-                    this.walletd.handle(decrypted_data)
-                }
-                break
+        case "core":
+            this.handle(decrypted_data)
+            break
+        case "daemon":
+            if (this.daemon) {
+                this.daemon.handle(decrypted_data)
+            }
+            break
+        case "wallet":
+            if (this.walletd) {
+                this.walletd.handle(decrypted_data)
+            }
+            break
         }
     }
 
-    handle(data) {
+    handle (data) {
         let params = data.data
 
         switch (data.method) {
-            case "quick_save_config":
-                // save only partial config settings
-                Object.keys(params).map(key => {
-                    this.config_data[key] = Object.assign(this.config_data[key], params[key])
-                })
-                fs.writeFile(this.config_file, JSON.stringify(this.config_data, null, 4), "utf8", () => {
-                    this.send("set_app_data", {
-                        config: params,
-                        pending_config: params
-                    })
-                })
-                break
-            case "change_remotes":
-                this.remotes = params
-                fs.writeFile(path.join(this.config_dir, "gui", "remotes.json"), JSON.stringify(params), "utf8", () => {
-                    this.send("set_app_data", {
-                        remotes: params,
-                    })
-                })
-                break
-            case "change_scan":
-                this.config_data.app.scan = params
+        case "quick_save_config":
+            // save only partial config settings
+            Object.keys(params).map(key => {
+                this.config_data[key] = Object.assign(this.config_data[key], params[key])
+            })
+            fs.writeFile(this.config_file, JSON.stringify(this.config_data, null, 4), "utf8", () => {
                 this.send("set_app_data", {
-                    scan: params,
+                    config: params,
+                    pending_config: params
                 })
-                break
+            })
+            break
+        case "change_remotes":
+            this.remotes = params
+            fs.writeFile(path.join(this.config_dir, "gui", "remotes.json"), JSON.stringify(params), "utf8", () => {
+                this.send("set_app_data", {
+                    remotes: params
+                })
+            })
+            break
+        case "change_scan":
+            this.config_data.app.scan = params
+            this.send("set_app_data", {
+                scan: params
+            })
+            break
 
-            case "save_config":
-                // check if config has changed
-                let config_changed = false
-                if (params.daemons.mainnet.remote_host) {
+        case "save_config":
+            // check if config has changed
+            let config_changed = false
+            if (params.daemons.mainnet.remote_host) {
+                let remote = this.remotes.find(remote => {
+                    return remote.host === params.daemons.mainnet.remote_host && remote.port === params.daemons.mainnet.remote_port
+                })
+                if (!remote) {
                     try {
                         this.remotes.push({
                             "host": params.daemons.mainnet.remote_host,
                             "port": params.daemons.mainnet.remote_port
-                        },)
+                        })
                         fs.writeFile("remotes.json", JSON.stringify(this.remotes, null, 4), "utf8", () => {
 
                         })
                     } catch {
                     }
-
                 }
-                Object.keys(this.config_data).map(i => {
-                    if (i == "appearance") return
-                    Object.keys(this.config_data[i]).map(j => {
-                        if (this.config_data[i][j] !== params[i][j]) {
-                            config_changed = true
-                        }
-                    })
-                })
-            case "save_config_init":
-                Object.keys(params).map(key => {
-                    this.config_data[key] = Object.assign(this.config_data[key], params[key])
-                })
-
-                const validated = Object.keys(this.defaults)
-                    .filter(k => k in this.config_data)
-                    .map(k => [k, this.validate_values(this.config_data[k], this.defaults[k])])
-                    .reduce((map, obj) => {
-                        map[obj[0]] = obj[1]
-                        return map
-                    }, {})
-
-                // Validate deamon data
-                this.config_data = {
-                    ...this.config_data,
-                    ...validated
-                }
-
-                fs.writeFile(this.config_file, JSON.stringify(this.config_data, null, 4), "utf8", () => {
-                    if (data.method == "save_config_init") {
-                        this.startup()
-                    } else {
-                        this.send("set_app_data", {
-                            config: this.config_data,
-                            pending_config: this.config_data
-                        })
-                        if (config_changed) {
-                            this.send("settings_changed_reboot")
-                        }
+            }
+            Object.keys(this.config_data).map(i => {
+                if (i === "appearance") return
+                Object.keys(this.config_data[i]).map(j => {
+                    if (this.config_data[i][j] !== params[i][j]) {
+                        config_changed = true
                     }
                 })
-                break
-            case "init":
-                this.startup()
-                break
+            })
+        case "save_config_init":
+            Object.keys(params).map(key => {
+                this.config_data[key] = Object.assign(this.config_data[key], params[key])
+            })
 
-            case "open_explorer":
-                if (params.type == "tx") {
-                    require("electron").shell.openExternal("http://154.38.165.93/tx/" + params.id)
-                }
-                break
+            const validated = Object.keys(this.defaults)
+                .filter(k => k in this.config_data)
+                .map(k => [k, this.validate_values(this.config_data[k], this.defaults[k])])
+                .reduce((map, obj) => {
+                    map[obj[0]] = obj[1]
+                    return map
+                }, {})
 
-            case "open_url":
-                require("electron").shell.openExternal(params.url)
-                break
+            // Validate deamon data
+            this.config_data = {
+                ...this.config_data,
+                ...validated
+            }
 
-            case "save_png":
-                let filename = dialog.showSaveDialog(this.mainWindow, {
-                    title: "Save " + params.type,
-                    filters: [{name: "PNG", extensions: ["png"]}],
-                    defaultPath: os.homedir()
-                })
-                if (filename) {
-                    let base64Data = params.img.replace(/^data:image\/png;base64,/, "")
-                    let binaryData = new Buffer(base64Data, "base64").toString("binary")
-                    fs.writeFile(filename, binaryData, "binary", (err) => {
-                        if (err) {
-                            this.send("show_notification", {
-                                type: "negative",
-                                message: "Error saving " + params.type,
-                                timeout: 2000
-                            })
-                        } else {
-                            this.send("show_notification", {
-                                message: params.type + " saved to " + filename,
-                                timeout: 2000
-                            })
-                        }
+            fs.writeFile(this.config_file, JSON.stringify(this.config_data, null, 4), "utf8", () => {
+                if (data.method === "save_config_init") {
+                    this.startup()
+                } else {
+                    this.send("set_app_data", {
+                        config: this.config_data,
+                        pending_config: this.config_data
                     })
+                    if (config_changed) {
+                        this.send("settings_changed_reboot")
+                    }
                 }
-                break
+            })
+            break
+        case "init":
+            this.startup()
+            break
 
-            default:
+        case "open_explorer":
+            if (params.type === "tx") {
+                require("electron").shell.openExternal("http://154.38.165.93/tx/" + params.id)
+            }
+            break
+
+        case "open_url":
+            require("electron").shell.openExternal(params.url)
+            break
+
+        case "save_png":
+            let filename = dialog.showSaveDialog(this.mainWindow, {
+                title: "Save " + params.type,
+                filters: [{ name: "PNG", extensions: ["png"] }],
+                defaultPath: os.homedir()
+            })
+            if (filename) {
+                let base64Data = params.img.replace(/^data:image\/png;base64,/, "")
+                let binaryData = Buffer.from(base64Data, "base64").toString("binary")
+                fs.writeFile(filename, binaryData, "binary", (err) => {
+                    if (err) {
+                        this.send("show_notification", {
+                            type: "negative",
+                            message: "Error saving " + params.type,
+                            timeout: 2000
+                        })
+                    } else {
+                        this.send("show_notification", {
+                            message: params.type + " saved to " + filename,
+                            timeout: 2000
+                        })
+                    }
+                })
+            }
+            break
+
+        default:
         }
     }
 
-    startup() {
+    startup () {
         this.send("set_app_data", {
             remotes: this.remotes,
             defaults: this.defaults
@@ -357,28 +360,25 @@ export class Backend {
             let fastest_time = 1000000
             if (this.config_data.app.scan) {
                 for (const i in this.remotes) {
-                    if (this.config_data.daemons.mainnet.type == "local")
-                        break
+                    if (this.config_data.daemons.mainnet.type === "local") { break }
                     let options = {
                         method: "POST",
                         json: {
                             jsonrpc: "2.0",
                             id: "0",
                             method: "get_info"
-                        },
+                        }
                     }
                     let start = new Date().getTime()
 
                     try {
                         await fetch("http://" + this.remotes[i].host + ":" + this.remotes[i].port + "/json_rpc", options)
                             .then(() => {
-                                console.log("http://" + this.remotes[i].host + ":" + this.remotes[i].port + "/json_rpc")
                                 let end = new Date().getTime() - start
                                 if (end < fastest_time) {
                                     port = this.remotes[i].port
                                     host = this.remotes[i].host
                                     fastest_time = end
-                                    console.log("http://" + this.remotes[i].host + ":" + this.remotes[i].port, fastest_time)
                                 }
                             })
                     } catch {
@@ -387,12 +387,10 @@ export class Backend {
                 }
             }
 
-            if (port != "") {
+            if (port) {
                 this.config_data.daemons.mainnet.remote_host = host
                 this.config_data.daemons.mainnet.remote_port = port
-
             }
-
 
             // here we may want to check if config data is valid, if not also send code -1
             // i.e. check ports are integers and > 1024, check that data dir path exists, etc
@@ -421,9 +419,9 @@ export class Backend {
             })
 
             // Make the wallet dir
-            const {wallet_data_dir, data_dir} = this.config_data.app
+            const { wallet_data_dir, data_dir } = this.config_data.app
             if (!fs.existsSync(wallet_data_dir)) {
-                fs.mkdirpSync(wallet_data_dir)
+                fs.mkdirSync(wallet_data_dir, { recursive: true })
             }
 
             // Check to see if data and wallet directories exist
@@ -431,10 +429,10 @@ export class Backend {
                 path: data_dir,
                 error: "Data storge path not found"
             },
-                {
-                    path: wallet_data_dir,
-                    error: "Wallet data storge path not found"
-                }]
+            {
+                path: wallet_data_dir,
+                error: "Wallet data storge path not found"
+            }]
 
             for (const dir of dirs_to_check) {
                 // Check to see if dir exists
@@ -455,7 +453,7 @@ export class Backend {
                 }
             }
 
-            const {net_type} = this.config_data.app
+            const { net_type } = this.config_data.app
 
             const dirs = {
                 "mainnet": this.config_data.app.data_dir,
@@ -466,12 +464,12 @@ export class Backend {
             // Make sure we have the directories we need
             const net_dir = dirs[net_type]
             if (!fs.existsSync(net_dir)) {
-                fs.mkdirpSync(net_dir)
+                fs.mkdirSync(net_dir, { recursive: true })
             }
 
             const log_dir = path.join(net_dir, "logs")
             if (!fs.existsSync(log_dir)) {
-                fs.mkdirpSync(log_dir)
+                fs.mkdirSync(log_dir, { recursive: true })
             }
 
             this.daemon = new Daemon(this)
@@ -554,46 +552,30 @@ export class Backend {
                         })
                     }
 
-                    async function killPort() {
-                        return new Promise(async ok => {
-                            try {
-                                await execSync('kill -9 $(lsof -ti:18082)', {encoding: 'utf-8'});
-                            } catch (err) {
-                            }
-                            try {
-                                let e = await execSync('netstat -ano | findstr :18082', {encoding: 'utf-8'});
-                                e = e.replace(/\s+/g, ' ').trim()
-                                let pid = e.split(" ")
-                                console.log(pid)
-
-                                for (let i = 4; i < pid.length; i += 5) {
-                                    if (Number(pid[i])) {
-                                        try {
-                                            await execSync(`taskkill /PID ${pid[i]} /F `, {encoding: 'utf-8'});
-                                            break
-                                        } catch (err) {
-                                            console.log("kill", err)
-                                        }
-                                    }
+                    async function killPort () {
+                        try {
+                            let pid = execSync("lsof -i tcp:18082 | tail -n +2 | awk '{print $2}'", { encoding: "utf-8" })
+                            if (pid) {
+                                pid = pid.toString().split("\\s")
+                                if (!isNaN(pid)) {
+                                    pid = Number(pid)
+                                    execSync(`kill -9 ${pid}`, { encoding: "utf-8" })
                                 }
-                            } catch (err) {
-                                console.log(err)
                             }
-                            ok()
-                        })
+                        } catch (error) {
+                        }
                     }
 
-                    await killPort()
+                    killPort()
 
-
-                    this.daemon.start(this.config_data).then(async () => {
+                    this.daemon.start(this.config_data).then(() => {
                         this.send("set_app_data", {
                             status: {
                                 code: 6 // Starting wallet
                             }
                         })
 
-                        await killPort()
+                        killPort()
 
                         this.walletd.start(this.config_data).then(() => {
                             this.send("set_app_data", {
@@ -620,15 +602,15 @@ export class Backend {
                         // eslint-disable-next-line
                     }).catch(error => {
                         this.daemon.killProcess()
-                        this.send("show_notification", {type: "negative", message: error.message, timeout: 3000})
-                        if (this.config_data.daemons[net_type].type == "remote") {
+                        this.send("show_notification", { type: "negative", message: error.message, timeout: 3000 })
+                        if (this.config_data.daemons[net_type].type === "remote") {
                             this.send("show_notification", {
                                 type: "negative",
                                 message: "Remote daemon cannot be reached",
                                 timeout: 3000
                             })
                         } else {
-                            this.send("show_notification", {type: "negative", message: error.message, timeout: 3000})
+                            this.send("show_notification", { type: "negative", message: error.message, timeout: 3000 })
                         }
                         this.send("set_app_data", {
                             status: {
@@ -648,7 +630,7 @@ export class Backend {
         })
     }
 
-    quit() {
+    quit () {
         return new Promise((resolve, reject) => {
             let process = []
             if (this.daemon) {
@@ -668,9 +650,9 @@ export class Backend {
     }
 
     // Replace any invalid value with default values
-    validate_values(values, defaults) {
+    validate_values (values, defaults) {
         const isDictionary = (v) => typeof v === "object" && v !== null && !(v instanceof Array) && !(v instanceof Date)
-        const modified = {...values}
+        const modified = { ...values }
 
         // Make sure we have valid defaults
         if (!isDictionary(defaults)) return modified

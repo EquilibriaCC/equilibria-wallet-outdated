@@ -45,8 +45,11 @@ module.exports = {
         "import/extensions": 0,
         "import/no-unresolved": 0,
         "import/no-extraneous-dependencies": 0,
+        "no-extra-boolean-cast": 0,
+        "handle-callback-err": 0,
 
         // allow debugger during development
-        "no-debugger": process.env.NODE_ENV === "production" ? 2 : 0
+        "no-debugger": process.env.NODE_ENV === "production" ? 2 : 0,
+        "no-fallthrough": { "allowEmptyCase": true }
     }
 }

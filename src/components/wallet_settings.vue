@@ -118,7 +118,6 @@
         </div>
     </q-modal>
 
-
     <q-modal minimized v-model="modals.rescan.visible">
         <div class="modal-header">Rescan Account</div>
         <div class="q-ma-lg">
@@ -263,11 +262,11 @@ export default {
         return {
             modals: {
                 private_keys: {
-                    visible: false,
+                    visible: false
                 },
                 rescan: {
                     visible: false,
-                    type: "full",
+                    type: "full"
                 },
                 sweep_all: {
                     visibile: false
@@ -276,46 +275,46 @@ export default {
                     visible: false,
                     type: "Export",
                     export_path: "",
-                    import_path: "",
+                    import_path: ""
                 },
                 change_password: {
                     visible: false,
                     old_password: "",
                     new_password: "",
-                    new_password_confirm: "",
-                },
+                    new_password_confirm: ""
+                }
             }
         }
     },
-    created() {
+    created () {
         const path = require("upath")
         this.modals.key_image.export_path = path.join(this.wallet_data_dir, "images", this.info.name)
         this.modals.key_image.import_path = path.join(this.wallet_data_dir, "images", this.info.name, "key_image_export")
     },
     watch: {
         secret: {
-            handler(val, old) {
-                if(val.view_key == old.view_key) return
-                switch(this.secret.view_key) {
-                    case "":
-                        break
-                    case -1:
-                        this.$q.notify({
-                            type: "negative",
-                            timeout: 1000,
-                            message: this.secret.mnemonic
-                        })
-                        this.$store.commit("gateway/set_wallet_data", {
-                            secret: {
-                                mnemonic: "",
-                                spend_key: "",
-                                view_key: ""
-                            }
-                        })
-                        break
-                    default:
-                        this.showModal("private_keys")
-                        break
+            handler (val, old) {
+                if (val.view_key === old.view_key) return
+                switch (this.secret.view_key) {
+                case "":
+                    break
+                case -1:
+                    this.$q.notify({
+                        type: "negative",
+                        timeout: 1000,
+                        message: this.secret.mnemonic
+                    })
+                    this.$store.commit("gateway/set_wallet_data", {
+                        secret: {
+                            mnemonic: "",
+                            spend_key: "",
+                            view_key: ""
+                        }
+                    })
+                    break
+                default:
+                    this.showModal("private_keys")
+                    break
                 }
             },
             deep: true
@@ -323,7 +322,7 @@ export default {
     },
     methods: {
         showModal (which) {
-            if(!this.is_ready) return
+            if (!this.is_ready) return
             this.modals[which].visible = true
         },
         hideModal (which) {
@@ -331,57 +330,57 @@ export default {
         },
         copyPrivateKey (type, event) {
             event.stopPropagation()
-            for(let i = 0; i < event.path.length; i++) {
-                if(event.path[i].tagName == "BUTTON") {
+            for (let i = 0; i < event.path.length; i++) {
+                if (event.path[i].tagName === "BUTTON") {
                     event.path[i].blur()
                     break
                 }
             }
 
-            if(this.secret[type] == null) {
+            if (this.secret[type] == null) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
-                    message: "Error copying private key",
+                    message: "Error copying private key"
                 })
                 return
             }
 
             clipboard.writeText(this.secret[type])
-            let type_human = type.substring(0,1).toUpperCase()+type.substring(1).replace("_"," ")
+            let type_human = type.substring(0, 1).toUpperCase() + type.substring(1).replace("_", " ")
 
             this.$q.dialog({
-                title: "Copy "+type_human,
+                title: "Copy " + type_human,
                 message: "Be careful who you send your private keys to as they control your funds.",
                 ok: {
                     label: "OK",
                     color: "positive"
-                },
+                }
             }).then(() => {
                 this.$q.notify({
                     type: "positive",
                     timeout: 1000,
-                    message: type_human+" copied to clipboard"
+                    message: type_human + " copied to clipboard"
                 })
             }).catch(() => {
                 this.$q.notify({
                     type: "positive",
                     timeout: 1000,
-                    message: type_human+" copied to clipboard"
+                    message: type_human + " copied to clipboard"
                 })
             })
         },
         getPrivateKeys () {
-            if(!this.is_ready) return
+            if (!this.is_ready) return
             this.showPasswordConfirmation({
                 title: "Show private keys",
                 noPasswordMessage: "Do you want to view your private keys?",
                 ok: {
                     label: "SHOW",
                     color: "positive"
-                },
+                }
             }).then(password => {
-                this.$gateway.send("wallet", "get_private_keys", {password})
+                this.$gateway.send("wallet", "get_private_keys", { password })
             }).catch(() => {
             })
         },
@@ -399,7 +398,7 @@ export default {
         },
         rescanWallet () {
             this.hideModal("rescan")
-            if(this.modals.rescan.type == "full") {
+            if (this.modals.rescan.type === "full") {
                 this.$q.dialog({
                     title: "Rescan wallet",
                     message: "Warning: Some information about previous transactions\nsuch as the recipient's address will be lost.",
@@ -422,23 +421,22 @@ export default {
         },
         sweepAll () {
             this.hideModal("sweep_all")
-                this.showPasswordConfirmation({
-                    title: "Sweep All",
-                    message: "Sweeping will consolidate inputs.",
-                    ok: {
-                        label: "Sweep",
-                        color: "positive"
-                    },
-                    cancel: {
-                        flat: true,
-                        label: "CANCEL",
-                        color: "red"
-                    }
-                }).then(password => {
-                    console.log("Hello")
-                    this.$gateway.send("wallet", "sweepAll", {password: password})
-                }).catch(() => {
-                })
+            this.showPasswordConfirmation({
+                title: "Sweep All",
+                message: "Sweeping will consolidate inputs.",
+                ok: {
+                    label: "Sweep",
+                    color: "positive"
+                },
+                cancel: {
+                    flat: true,
+                    label: "CANCEL",
+                    color: "red"
+                }
+            }).then(password => {
+                this.$gateway.send("wallet", "sweepAll", { password: password })
+            }).catch(() => {
+            })
         },
         selectKeyImageExportPath () {
             this.$refs.keyImageExportSelect.click()
@@ -460,29 +458,24 @@ export default {
                 noPasswordMessage: `Do you want to ${this.modals.key_image.type.toLowerCase()} key images?`,
                 ok: {
                     label: this.modals.key_image.type
-                },
+                }
             }).then(password => {
-                if(this.modals.key_image.type == "Export")
-                    this.$gateway.send("wallet", "export_key_images", {password: password, path: this.modals.key_image.export_path})
-                else if(this.modals.key_image.type == "Import")
-                    this.$gateway.send("wallet", "import_key_images", {password: password, path: this.modals.key_image.import_path})
+                if (this.modals.key_image.type === "Export") { this.$gateway.send("wallet", "export_key_images", { password: password, path: this.modals.key_image.export_path }) } else if (this.modals.key_image.type === "Import") { this.$gateway.send("wallet", "import_key_images", { password: password, path: this.modals.key_image.import_path }) }
             }).catch(() => {
             })
-
         },
         doChangePassword () {
-
             let old_password = this.modals.change_password.old_password
             let new_password = this.modals.change_password.new_password
             let new_password_confirm = this.modals.change_password.new_password_confirm
 
-            if(new_password == old_password) {
+            if (new_password === old_password) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
                     message: "New password must be different"
                 })
-            } else if(new_password != new_password_confirm) {
+            } else if (new_password !== new_password_confirm) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
@@ -490,9 +483,8 @@ export default {
                 })
             } else {
                 this.hideModal("change_password")
-                this.$gateway.send("wallet", "change_wallet_password", {old_password, new_password})
+                this.$gateway.send("wallet", "change_wallet_password", { old_password, new_password })
             }
-
         },
         clearChangePassword () {
             this.modals.change_password.old_password = ""
@@ -500,7 +492,7 @@ export default {
             this.modals.change_password.new_password_confirm = ""
         },
         deleteWallet () {
-            if(!this.is_ready) return
+            if (!this.is_ready) return
             this.$q.dialog({
                 title: "Delete wallet",
                 message: "Are you absolutely sure you want to delete your wallet?\nMake sure you have your private keys backed up.\nTHIS PROCESS IS NOT REVERSIBLE!",
@@ -535,14 +527,14 @@ export default {
                     }
                 })
             }).then(password => {
-                this.$gateway.send("wallet", "delete_wallet", {password})
+                this.$gateway.send("wallet", "delete_wallet", { password })
             }).catch(() => {
             })
         }
     },
     mixins: [WalletPassword],
     components: {
-        tritonField,
+        tritonField
     }
 }
 </script>

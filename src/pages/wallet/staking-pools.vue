@@ -91,7 +91,6 @@ box-shadow: 0px 0px 21px -1px #005BC6">
                                     }} XEQ<br/>
                                 </p>
 
-
                                 <div v-if="isFull(item)">
                                     <q-field class="q-pt-sm">
                                         <q-btn style="background-color: #005BC6"
@@ -101,14 +100,13 @@ box-shadow: 0px 0px 21px -1px #005BC6">
                                                label="Stake"/>
                                     </q-field>
                                 </div>
-                                <div v-else="!isFull(item.contributors)">
+                                <div v-if="!isFull(item.contributors)">
 
                                     <div style="padding-bottom: 75px"/>
                                 </div>
 
                             </div>
                         </div>
-
 
                         <div style="padding-top: 5px"/>
                     </div>
@@ -158,14 +156,13 @@ box-shadow: 0px 0px 21px -1px #005BC6">
                                                label="Stake"/>
                                     </q-field>
                                 </div>
-                                <div v-else="!isFull(item.contributors)">
+                                <div v-if="!isFull(item.contributors)">
 
                                     <div style="padding-bottom: 75px"/>
                                 </div>
 
                             </div>
                         </div>
-
 
                         <div style="padding-top: 5px"/>
                     </div>
@@ -211,15 +208,15 @@ box-shadow: 0px 0px 21px -1px #005BC6">
 </template>
 
 <script>
-import {mapState} from "vuex"
+import { mapState } from "vuex"
 import TxList from "components/pools_list"
 import tritonField from "components/triton_field"
 import WalletPassword from "src/mixins/wallet_password"
-import axios from 'axios'
-import VueToggles from 'vue-toggles';
+import axios from "axios"
+import VueToggles from "vue-toggles"
 
 export default {
-    data() {
+    data () {
         return {
             tx_type: "all",
             tx_txid: "",
@@ -255,14 +252,14 @@ export default {
                 }
             },
             tx_type_options: [
-                {label: "All", value: "all"},
-                {label: "Incoming", value: "in"},
-                {label: "Outgoing", value: "out"},
-                {label: "Pending", value: "all_pending"},
-                {label: "Miner", value: "miner"},
-                {label: "Service Node", value: "snode"},
-                {label: "Stake", value: "stake"},
-                {label: "Failed", value: "failed"},
+                { label: "All", value: "all" },
+                { label: "Incoming", value: "in" },
+                { label: "Outgoing", value: "out" },
+                { label: "Pending", value: "all_pending" },
+                { label: "Miner", value: "miner" },
+                { label: "Service Node", value: "snode" },
+                { label: "Stake", value: "stake" },
+                { label: "Failed", value: "failed" }
             ]
 
         }
@@ -273,185 +270,175 @@ export default {
         tx_status: state => state.gateway.tx_status,
         unlocked_balance: state => state.gateway.wallet.info.unlocked_balance,
         info: state => state.gateway.wallet.info,
-        state: state => state,
+        state: state => state
     }),
 
     components: {
         TxList,
         tritonField
     },
-    mounted() {
+    mounted () {
         let stake_data = this.state.gateway.wallet.staker.stake
-        console.log("data", stake_data)
 
         if (!stake_data) return
         let user_pools = []
         let n_op = 0
         this.tx_list.map(item => {
             stake_data.staked_nodes.map(node => {
-                // console.log(node.node_key, item.service_node_pubkey)
-
-                if (item.service_node_pubkey == node.node_key) {
-                    user_pools.push({...item, ...node})
+                if (item.service_node_pubkey === node.node_key) {
+                    user_pools.push({ ...item, ...node })
                 }
             })
         })
         user_pools.map(node => {
-            if (node.is_operator)
-                n_op++
+            if (node.is_operator) { n_op++ }
         })
         this.num_operating = n_op
-        console.log(stake_data.total_staked)
         this.staked_pools = user_pools
         fetch("https://api.coingecko.com/api/v3/coins/triton?tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false\n")
             .then(response => response.json())
             .then(data => {
-                console.log(data.market_data.current_price.usd)
                 this.current_price = data.market_data.current_price.usd
                 this.$forceUpdate()
-            });
+            })
         this.stake_data = stake_data
         this.total_stake_amount = stake_data.total_staked_amount
         this.num_nodes_staked_to = stake_data.total_nodes_staked_to
         this.next_unlock = stake_data.lowest_unlock_time_by_block
         this.daily_reward = (720 / stake_data.total_nodes) * (stake_data.reward) * ((stake_data.total_staked_amount / stake_data.total_nodes_staked_to) / stake_data.avg_staking_req)
         this.earnings_for_period = this.daily_reward * ((stake_data.avg_unlock_time - stake_data.avg_reg_height) / 720)
-        console.log(this.daily_reward, this.earnings_for_period)
     },
     watch: {
         stake_status: {
-            handler(val, old) {
-                if (val.code == old.code) return
+            handler (val, old) {
+                if (val.code === old.code) return
                 switch (this.stake_status.code) {
-                    case 0:
-                        this.$q.notify({
-                            type: "positive",
-                            timeout: 10000,
-                            message: this.stake_status.message
-                        })
-                        this.$v.$reset();
-                        this.service_node = {
-                            key: "",
-                            amount: 0,
-                            award_address: "",
-                        }
-                        break;
-                    case -1:
-                        this.$q.notify({
-                            type: "negative",
-                            timeout: 10000,
-                            message: this.stake_status.message
-                        })
-                        break;
+                case 0:
+                    this.$q.notify({
+                        type: "positive",
+                        timeout: 10000,
+                        message: this.stake_status.message
+                    })
+                    this.$v.$reset()
+                    this.service_node = {
+                        key: "",
+                        amount: 0,
+                        award_address: ""
+                    }
+                    break
+                case -1:
+                    this.$q.notify({
+                        type: "negative",
+                        timeout: 10000,
+                        message: this.stake_status.message
+                    })
+                    break
                 }
             },
             deep: true
         },
         tx_status: {
-            handler(val, old) {
+            handler (val, old) {
                 // if(val.code == old.code) return
                 switch (this.tx_status.code) {
-                    case 0:
-                        this.$q.dialog({
-                            title: "Confirm Fee",
-                            message: this.tx_status.message,
-                            ok: {
-                                label: "OK",
-                                color: "positive"
+                case 0:
+                    this.$q.dialog({
+                        title: "Confirm Fee",
+                        message: this.tx_status.message,
+                        ok: {
+                            label: "OK",
+                            color: "positive"
 
-                            },
-                            cancel: {
-                                flat: true,
-                                label: "CANCEL",
-                                color: "red"
-                            }
-                        }).then(() => {
-                            this.$gateway.send("wallet", "stake_confirm", {})
-                        }).catch(() => {
-                            this.$gateway.send("wallet", "stake_cancel", {})
+                        },
+                        cancel: {
+                            flat: true,
+                            label: "CANCEL",
+                            color: "red"
+                        }
+                    }).then(() => {
+                        this.$gateway.send("wallet", "stake_confirm", {})
+                    }).catch(() => {
+                        this.$gateway.send("wallet", "stake_cancel", {})
+                    })
+                    break
+                case -1:
 
-                        })
-                        break;
-                    case -1:
-
-                        break;
+                    break
                 }
             },
             deep: true
-        },
+        }
     },
     methods: {
         isFull: function (item) {
-            return item.total_contributed < item.staking_requirement;
+            return item.total_contributed < item.staking_requirement
         },
         myShare: function (contrib) {
-            let sum_of_my_stake = 0;
+            let sum_of_my_stake = 0
             for (let i = 0; i < contrib.length; i++) {
-                if (this.info.address == contrib[i].address) {
-                    sum_of_my_stake += contrib[i].amount;
+                if (this.info.address === contrib[i].address) {
+                    sum_of_my_stake += contrib[i].amount
                     // if (this.stake_transactions[key] == undefined) {
                     //     this.stake_transactions[key] = contrib[i].amount;
                     //     this.keys.push_back(key);
                     // }
                 }
             }
-            return sum_of_my_stake;
+            return sum_of_my_stake
         },
         isMine: function (contrib) {
-
             for (let i = 0; i < contrib.length; i++) {
-                if (this.info.address == contrib[i].address)
-                    return true;
+                if (this.info.address === contrib[i].address) { return true }
             }
 
-            return false;
+            return false
         },
         conversionFromXtri: function (amount) {
-            //xtri price in sats variable
-            let sats;
-            //btc prices in differnt currencies
-            let currentPrice;
-            let prices = [];
-            let dollar_amount = 0;
-            //getting xtri price in sats from Trade Ogre
-            axios.get(`https://tradeogre.com/api/v1/ticker/BTC-XEQ`).then(res => {
-                sats = res.data.price;
+            // xtri price in sats variable
+            let sats
+            // btc prices in differnt currencies
+            let currentPrice
+            let prices = []
+            // let dollar_amount = 0
+            // getting xtri price in sats from Trade Ogre
+            axios.get("https://tradeogre.com/api/v1/ticker/BTC-XEQ").then(res => {
+                sats = res.data.price
 
-                //getting btc price in usd
-                axios.get(`https://blockchain.info/ticker`).then(res => {
-                    //btc prices in difffernt gov currencys
-                    prices[0] = res.data.USD["15m"];
-                    prices[1] = res.data.AUD["15m"];
-                    prices[2] = res.data.BRL["15m"];
-                    prices[3] = res.data.CAD["15m"];
-                    prices[4] = res.data.CHF["15m"];
-                    prices[5] = res.data.CLP["15m"];
-                    prices[6] = res.data.CNY["15m"];
-                    prices[7] = res.data.DKK["15m"];
-                    prices[8] = res.data.EUR["15m"];
-                    prices[9] = res.data.GBP["15m"];
-                    prices[10] = res.data.HKD["15m"];
-                    prices[11] = res.data.INR["15m"];
-                    prices[12] = res.data.ISK["15m"];
-                    prices[13] = res.data.JPY["15m"];
-                    prices[14] = res.data.KRW["15m"];
-                    prices[15] = res.data.NZD["15m"];
-                    prices[16] = res.data.PLN["15m"];
-                    prices[17] = res.data.RUB["15m"];
-                    prices[18] = res.data.SEK["15m"];
-                    prices[19] = res.data.SGD["15m"];
-                    prices[20] = res.data.THB["15m"];
-                    prices[21] = res.data.TWD["15m"];
-                    currentPrice = prices[0];
+                // getting btc price in usd
+                axios.get("https://blockchain.info/ticker").then(res => {
+                    // btc prices in difffernt gov currencys
+                    prices[0] = res.data.USD["15m"]
+                    prices[1] = res.data.AUD["15m"]
+                    prices[2] = res.data.BRL["15m"]
+                    prices[3] = res.data.CAD["15m"]
+                    prices[4] = res.data.CHF["15m"]
+                    prices[5] = res.data.CLP["15m"]
+                    prices[6] = res.data.CNY["15m"]
+                    prices[7] = res.data.DKK["15m"]
+                    prices[8] = res.data.EUR["15m"]
+                    prices[9] = res.data.GBP["15m"]
+                    prices[10] = res.data.HKD["15m"]
+                    prices[11] = res.data.INR["15m"]
+                    prices[12] = res.data.ISK["15m"]
+                    prices[13] = res.data.JPY["15m"]
+                    prices[14] = res.data.KRW["15m"]
+                    prices[15] = res.data.NZD["15m"]
+                    prices[16] = res.data.PLN["15m"]
+                    prices[17] = res.data.RUB["15m"]
+                    prices[18] = res.data.SEK["15m"]
+                    prices[19] = res.data.SGD["15m"]
+                    prices[20] = res.data.THB["15m"]
+                    prices[21] = res.data.TWD["15m"]
+                    currentPrice = prices[0]
 
-                    //Do conversion with current currency
-                    this.tvl = ((amount * currentPrice) * sats).toFixed(0);
+                    // Do conversion with current currency
+                    this.tvl = ((amount * currentPrice) * sats).toFixed(0)
                 })
-            });
+            })
 
-            return this.tvl;
+            return this.tvl
         },
-        getLockTime(height) {
+        getLockTime (height) {
             if ((height + 20160) - this.info.height < 30) {
                 return Math.round(((height + 20160) - this.info.height) / 2).toString() + " minutes"
             } else if ((height + 20160) - this.info.height < 720) {
@@ -482,9 +469,8 @@ export default {
                     label: "STAKE",
                     color: "positive"
 
-                },
+                }
             }).then(password => {
-
                 this.$store.commit("gateway/set_tx_status", {
                     code: 1,
                     message: "Sending transaction",
@@ -492,8 +478,10 @@ export default {
                 })
 
                 this.$gateway.send("wallet", "stake", {
-                    password: password, amount: this.stake_amount, key: this.oracleKey,
-                    destination: this.info.address,
+                    password: password,
+                    amount: this.stake_amount,
+                    key: this.oracleKey,
+                    destination: this.info.address
                 })
             }).catch(() => {
             })

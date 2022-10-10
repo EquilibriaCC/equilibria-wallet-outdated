@@ -71,23 +71,23 @@ export default {
     }),
     watch: {
         status: {
-            handler(val, old){
-                if(val.code == old.code) return
-                switch(this.status.code) {
-                    case 1:
-                        break;
-                    case 0:
-                        this.$q.loading.hide()
-                        this.$router.replace({ path: "/wallet-select/created" });
-                        break;
-                    default:
-                        this.$q.loading.hide()
-                        this.$q.notify({
-                            type: "negative",
-                            timeout: 1000,
-                            message: this.status.message
-                        })
-                        break;
+            handler (val, old) {
+                if (val.code === old.code) return
+                switch (this.status.code) {
+                case 1:
+                    break
+                case 0:
+                    this.$q.loading.hide()
+                    this.$router.replace({ path: "/wallet-select/created" })
+                    break
+                default:
+                    this.$q.loading.hide()
+                    this.$q.notify({
+                        type: "negative",
+                        timeout: 1000,
+                        message: this.status.message
+                    })
+                    break
                 }
             },
             deep: true
@@ -99,7 +99,7 @@ export default {
         }
     },
     methods: {
-        import_wallet() {
+        import_wallet () {
             this.$v.wallet.$touch()
 
             if (this.$v.wallet.$error) {
@@ -110,7 +110,7 @@ export default {
                 })
                 return
             }
-            if(this.wallet.password != this.wallet.password_confirm) {
+            if (this.wallet.password !== this.wallet.password_confirm) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
@@ -125,10 +125,10 @@ export default {
 
             this.wallet.path = this.wallet_path
 
-            this.$gateway.send("wallet", "import_wallet", this.wallet);
+            this.$gateway.send("wallet", "import_wallet", this.wallet)
         },
-        cancel() {
-            this.$router.replace({ path: "/wallet-select" });
+        cancel () {
+            this.$router.replace({ path: "/wallet-select" })
         }
     }
 }

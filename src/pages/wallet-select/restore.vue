@@ -102,32 +102,32 @@ export default {
                 refresh_start_date: 1525305600000, // timestamp of block 1
                 password: "",
                 password_confirm: ""
-            },
+            }
         }
     },
     computed: mapState({
         theme: state => state.gateway.app.config.appearance.theme,
-        status: state => state.gateway.wallet.status,
+        status: state => state.gateway.wallet.status
     }),
     watch: {
         status: {
-            handler(val, old){
-                if(val.code == old.code) return
-                switch(this.status.code) {
-                    case 1:
-                        break;
-                    case 0:
-                        this.$q.loading.hide()
-                        this.$router.replace({ path: "/wallet-select/created" });
-                        break;
-                    default:
-                        this.$q.loading.hide()
-                        this.$q.notify({
-                            type: "negative",
-                            timeout: 1000,
-                            message: this.status.message
-                        })
-                        break;
+            handler (val, old) {
+                if (val.code === old.code) return
+                switch (this.status.code) {
+                case 1:
+                    break
+                case 0:
+                    this.$q.loading.hide()
+                    this.$router.replace({ path: "/wallet-select/created" })
+                    break
+                default:
+                    this.$q.loading.hide()
+                    this.$q.notify({
+                        type: "negative",
+                        timeout: 1000,
+                        message: this.status.message
+                    })
+                    break
                 }
             },
             deep: true
@@ -141,7 +141,7 @@ export default {
         }
     },
     methods: {
-        restore_wallet() {
+        restore_wallet () {
             this.$v.wallet.$touch()
 
             if (this.$v.wallet.name.$error) {
@@ -166,7 +166,7 @@ export default {
                 .replace(/\t/g, " ")
                 .replace(/\s{2,}/g, " ")
                 .split(" ")
-            if(seed.length !== 14 && seed.length !== 24 && seed.length !== 25 && seed.length !== 26) {
+            if (seed.length !== 14 && seed.length !== 24 && seed.length !== 25 && seed.length !== 26) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
@@ -183,7 +183,7 @@ export default {
                 })
                 return
             }
-            if(this.wallet.password != this.wallet.password_confirm) {
+            if (this.wallet.password !== this.wallet.password_confirm) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
@@ -196,10 +196,10 @@ export default {
                 delay: 0
             })
 
-            this.$gateway.send("wallet", "restore_wallet", this.wallet);
+            this.$gateway.send("wallet", "restore_wallet", this.wallet)
         },
-        cancel() {
-            this.$router.replace({ path: "/wallet-select" });
+        cancel () {
+            this.$router.replace({ path: "/wallet-select" })
         }
     },
     components: {

@@ -8,7 +8,7 @@
     <template v-else>
         <q-infinite-scroll :handler="loadMore" ref="scroller">
             <q-list link no-border :dark="theme=='dark'" class="triton-list tx-list">
-                <q-item class="triton-list-item transaction" v-for="(tx, index) in tx_list_paged" :key="tx.txid"
+                <q-item class="triton-list-item transaction" v-for="(tx) in tx_list_paged" :key="tx.txid"
                         @click.native="details(tx)" :class="'tx-'+tx.last_reward_block_height">
                     <q-item-side class="type">
                         <div>{{ Object.keys(tx.contributors).length }}</div>
@@ -40,8 +40,8 @@
 const { clipboard } = require("electron")
 import { mapState } from "vuex"
 import { QSpinnerDots } from "quasar"
-import Identicon from "components/identicon"
-import TxTypeIcon from "components/tx_type_icon"
+// import Identicon from "components/identicon"
+// import TxTypeIcon from "components/tx_type_icon"
 import TxDetails from "components/tx_details"
 import Formattriton from "components/format_triton"
 
@@ -72,7 +72,7 @@ export default {
             type: Number,
             required: false,
             default: -1
-        },
+        }
     },
     data () {
         return {
@@ -85,7 +85,7 @@ export default {
         theme: state => state.gateway.app.config.appearance.theme,
         current_height: state => state.gateway.daemon.info.height,
         wallet_height: state => state.gateway.wallet.info.height,
-        tx_list: state => state.gateway.wallet.pools.pool_list,
+        tx_list: state => state.gateway.wallet.pools.pool_list
     }),
     created () {
         this.filterTxList()
@@ -93,16 +93,16 @@ export default {
     },
     watch: {
         wallet_height: {
-            handler(val, old){
-                if(val == old) return
+            handler (val, old) {
+                if (val === old) return
                 this.filterTxList()
                 this.pageTxList()
             }
         },
         tx_list: {
-            handler(val, old ) {
+            handler (val, old) {
                 // Check if anything changed in the tx list
-                if(val.length == old.length) {
+                if (val.length === old.length) {
                     const changed = val.filter((v, i) => v.note !== old[i].note)
                     if (changed.length === 0) return
                 }
@@ -111,9 +111,9 @@ export default {
             }
         },
         type: {
-            handler(val, old){
-                if(val == old) return
-                if(this.$refs.scroller) {
+            handler (val, old) {
+                if (val === old) return
+                if (this.$refs.scroller) {
                     this.$refs.scroller.stop()
                     this.page = 0
                     this.$refs.scroller.reset()
@@ -124,9 +124,9 @@ export default {
             }
         },
         txid: {
-            handler(val, old){
-                if(val == old) return
-                if(this.$refs.scroller) {
+            handler (val, old) {
+                if (val === old) return
+                if (this.$refs.scroller) {
                     this.$refs.scroller.stop()
                     this.page = 0
                     this.$refs.scroller.reset()
@@ -135,34 +135,33 @@ export default {
                 this.filterTxList()
                 this.pageTxList()
             }
-        },
+        }
     },
     filters: {
         typeToString: function (value) {
             switch (value) {
-                case "in":
-                    return "Received"
-                case "out":
-                    return "Sent"
-                case "failed":
-                    return "Failed"
-                case "pending":
-                case "pool":
-                    return "Pending"
-                case "miner":
-                    return "Miner"
-                case "snode":
-                    return "Service Node"
-                case "stake":
-                    return "Stake"
-                default:
-                    return "-"
+            case "in":
+                return "Received"
+            case "out":
+                return "Sent"
+            case "failed":
+                return "Failed"
+            case "pending":
+            case "pool":
+                return "Pending"
+            case "miner":
+                return "Miner"
+            case "snode":
+                return "Service Node"
+            case "stake":
+                return "Stake"
+            default:
+                return "-"
             }
         }
     },
     methods: {
         filterTxList () {
-            console.log(this)
             const all_in = ["in", "pool", "miner", "snode"]
             const all_out = ["out", "pending", "stake"]
             const all_pending = ["pending", "pool"]
@@ -181,27 +180,27 @@ export default {
                     return false
                 }
 
-                if(!this.type.startsWith("all") && this.type !== tx.type) {
+                if (!this.type.startsWith("all") && this.type !== tx.type) {
                     valid = false
                     return valid
                 }
 
-                if(this.txid !== "") {
+                if (this.txid !== "") {
                     valid = tx.txid.toLowerCase().indexOf(this.txid.toLowerCase()) !== -1
                     return valid
                 }
 
-                if(this.toOutgoingAddress !== "") {
-                    if(tx.hasOwnProperty("destinations")) {
-                        valid = tx.destinations.filter((destination) => { return destination.address === this.toOutgoingAddress }).length;
+                if (this.toOutgoingAddress !== "") {
+                    if (tx.hasOwnProperty("destinations")) {
+                        valid = tx.destinations.filter((destination) => { return destination.address === this.toOutgoingAddress }).length
                     } else {
                         valid = false
                     }
                     return valid
                 }
 
-                if(this.toIncomingAddressIndex !== -1) {
-                    valid = tx.hasOwnProperty("subaddr_index") && tx.subaddr_index.minor == this.toIncomingAddressIndex
+                if (this.toIncomingAddressIndex !== -1) {
+                    valid = tx.hasOwnProperty("subaddr_index") && tx.subaddr_index.minor === this.toIncomingAddressIndex
                     return valid
                 }
 
@@ -211,9 +210,9 @@ export default {
         pageTxList () {
             // this.tx_list_paged = this.tx_list_filtered.slice(0, this.limit !== -1 ? this.limit : this.page * 24 + 24)
         },
-        loadMore: function(index, done) {
+        loadMore: function (index, done) {
             this.page = index
-            if(this.limit !== -1 || this.tx_list_filtered.length < this.page * 24 + 24) {
+            if (this.limit !== -1 || this.tx_list_filtered.length < this.page * 24 + 24) {
                 this.$refs.scroller.stop()
             }
             this.pageTxList()
@@ -226,7 +225,7 @@ export default {
             // this.$refs.txDetails.txNotes = tx.note;
             // this.$refs.txDetails.isVisible = true;
         },
-        formatHeight(tx) {
+        formatHeight (tx) {
             // let height = tx.height;
             // let confirms = Math.max(0, this.wallet_height - height);
             // if(height == 0)
@@ -238,8 +237,8 @@ export default {
         },
         copyTxid (txid, event) {
             event.stopPropagation()
-            for(let i = 0; i < event.path.length; i++) {
-                if(event.path[i].tagName == "BUTTON") {
+            for (let i = 0; i < event.path.length; i++) {
+                if (event.path[i].tagName === "BUTTON") {
                     event.path[i].blur()
                     break
                 }
@@ -257,8 +256,8 @@ export default {
     },
     components: {
         QSpinnerDots,
-        Identicon,
-        TxTypeIcon,
+        // Identicon,
+        // TxTypeIcon,
         TxDetails,
         Formattriton
     }

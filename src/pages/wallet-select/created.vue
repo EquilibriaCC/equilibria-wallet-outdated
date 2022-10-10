@@ -88,7 +88,7 @@
 <script>
 const { clipboard } = require("electron")
 import { mapState } from "vuex"
-import AddressHeader from "components/address_header"
+// import AddressHeader from "components/address_header"
 export default {
     computed: mapState({
         info: state => state.gateway.wallet.info,
@@ -98,7 +98,7 @@ export default {
         }
     }),
     methods: {
-        open() {
+        open () {
             setTimeout(() => {
                 this.$store.commit("gateway/set_wallet_data", {
                     secret: {
@@ -108,54 +108,54 @@ export default {
                     }
                 })
             }, 500)
-            this.$router.replace({ path: "/wallet" });
+            this.$router.replace({ path: "/wallet" })
         },
         copyPrivateKey (type, event) {
             event.stopPropagation()
-            for(let i = 0; i < event.path.length; i++) {
-                if(event.path[i].tagName == "BUTTON") {
+            for (let i = 0; i < event.path.length; i++) {
+                if (event.path[i].tagName === "BUTTON") {
                     event.path[i].blur()
                     break
                 }
             }
 
-            if(this.secret[type] == null) {
+            if (this.secret[type] == null) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
-                    message: "Error copying private key",
+                    message: "Error copying private key"
                 })
                 return
             }
 
             clipboard.writeText(this.secret[type])
-            let type_human = type.substring(0,1).toUpperCase()+type.substring(1).replace("_"," ")
+            let type_human = type.substring(0, 1).toUpperCase() + type.substring(1).replace("_", " ")
 
             this.$q.dialog({
-                title: "Copy "+type_human,
+                title: "Copy " + type_human,
                 message: "Be careful who you send your private keys to as they control your funds.",
                 ok: {
                     label: "OK",
                     color: "positive"
 
-                },
+                }
             }).then(() => {
                 this.$q.notify({
                     type: "positive",
                     timeout: 1000,
-                    message: type_human+" copied to clipboard"
+                    message: type_human + " copied to clipboard"
                 })
             }).catch(() => {
                 this.$q.notify({
                     type: "positive",
                     timeout: 1000,
-                    message: type_human+" copied to clipboard"
+                    message: type_human + " copied to clipboard"
                 })
             })
-        },
+        }
     },
     components: {
-        AddressHeader,
+        // AddressHeader
     }
 
 }

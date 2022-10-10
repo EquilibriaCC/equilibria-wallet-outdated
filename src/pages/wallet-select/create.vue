@@ -63,45 +63,45 @@ export default {
 
             languageOptions: [
 
-                {label: "English", value: "English"},
-                {label: "Deutsch", value: "Deutsch"},
-                {label: "Español", value: "Español"},
-                {label: "Français", value: "Français"},
-                {label: "Italiano", value: "Italiano"},
-                {label: "Nederlands", value: "Nederlands"},
-                {label: "Português", value: "Português"},
-                {label: "Русский", value: "Русский"},
-                {label: "日本語", value: "日本語"},
-                {label: "简体中文 (中国)", value: "简体中文 (中国)"},
-                {label: "Esperanto", value: "Esperanto"},
-                {label: "Lojban", value: "Lojban"}
+                { label: "English", value: "English" },
+                { label: "Deutsch", value: "Deutsch" },
+                { label: "Español", value: "Español" },
+                { label: "Français", value: "Français" },
+                { label: "Italiano", value: "Italiano" },
+                { label: "Nederlands", value: "Nederlands" },
+                { label: "Português", value: "Português" },
+                { label: "Русский", value: "Русский" },
+                { label: "日本語", value: "日本語" },
+                { label: "简体中文 (中国)", value: "简体中文 (中国)" },
+                { label: "Esperanto", value: "Esperanto" },
+                { label: "Lojban", value: "Lojban" }
 
             ]
         }
     },
     computed: mapState({
         theme: state => state.gateway.app.config.appearance.theme,
-        status: state => state.gateway.wallet.status,
+        status: state => state.gateway.wallet.status
     }),
     watch: {
         status: {
-            handler(val, old){
-                if(val.code == old.code) return
-                switch(this.status.code) {
-                    case 1:
-                        break;
-                    case 0:
-                        this.$q.loading.hide()
-                        this.$router.replace({ path: "/wallet-select/created" });
-                        break;
-                    default:
-                        this.$q.loading.hide()
-                        this.$q.notify({
-                            type: "negative",
-                            timeout: 1000,
-                            message: this.status.message
-                        })
-                        break;
+            handler (val, old) {
+                if (val.code === old.code) return
+                switch (this.status.code) {
+                case 1:
+                    break
+                case 0:
+                    this.$q.loading.hide()
+                    this.$router.replace({ path: "/wallet-select/created" })
+                    break
+                default:
+                    this.$q.loading.hide()
+                    this.$q.notify({
+                        type: "negative",
+                        timeout: 1000,
+                        message: this.status.message
+                    })
+                    break
                 }
             },
             deep: true
@@ -113,7 +113,7 @@ export default {
         }
     },
     methods: {
-        create() {
+        create () {
             this.$v.wallet.$touch()
 
             if (this.$v.wallet.$error) {
@@ -124,7 +124,7 @@ export default {
                 })
                 return
             }
-            if(this.wallet.password != this.wallet.password_confirm) {
+            if (this.wallet.password !== this.wallet.password_confirm) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
@@ -134,7 +134,7 @@ export default {
             }
 
             // Warn user if no password is set
-            let passwordPromise = Promise.resolve();
+            let passwordPromise = Promise.resolve()
             if (!this.wallet.password) {
                 passwordPromise = this.$q.dialog({
                     title: "No password set",
@@ -147,7 +147,7 @@ export default {
                         flat: true,
                         label: "CANCEL",
                         color: "red"
-                    },
+                    }
                 })
             }
 
@@ -160,8 +160,8 @@ export default {
                 })
                 .catch(() => {})
         },
-        cancel() {
-            this.$router.replace({ path: "/wallet-select" });
+        cancel () {
+            this.$router.replace({ path: "/wallet-select" })
         }
     },
     components: {

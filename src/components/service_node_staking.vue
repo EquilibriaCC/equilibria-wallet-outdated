@@ -35,8 +35,6 @@
             <q-btn color="secondary" @click="service_node.amount = unlocked_balance / 1e4" :text-color="theme=='dark'?'white':'dark'">All</q-btn>
         </tritonField>
 
-
-
         <q-field class="q-pt-sm">
             <q-btn
                 :disable="!is_able_to_send"
@@ -53,7 +51,7 @@
 
 <script>
 const { clipboard } = require("electron")
-const objectAssignDeep = require("object-assign-deep");
+const objectAssignDeep = require("object-assign-deep")
 import { mapState } from "vuex"
 import { required, decimal } from "vuelidate/lib/validators"
 import { payment_id, service_node_key, greater_than_zero, address } from "src/validators/common"
@@ -76,8 +74,8 @@ export default {
         },
 
         addressType (state) {
-            const address = this.service_node.award_address;
-            const inArray = (array) => array.map(o => o.address).includes(address);
+            const address = this.service_node.award_address
+            const inArray = (array) => array.map(o => o.address).includes(address)
 
             const { primary, used, unused } = this.address_list
             if (inArray(primary)) {
@@ -96,21 +94,21 @@ export default {
             service_node: {
                 key: "",
                 amount: 0,
-                award_address: "",
-            },
+                award_address: ""
+            }
         }
     },
     filters: {
         addressTypeString: function (value) {
             switch (value) {
-                case "primary":
-                    return "Your primary address"
-                case "used":
-                    return "Your used address"
-                case "ununsed":
-                    return "Your unused address"
-                default:
-                    return "Not your address!"
+            case "primary":
+                return "Your primary address"
+            case "used":
+                return "Your used address"
+            case "ununsed":
+                return "Your unused address"
+            default:
+                return "Not your address!"
             }
         }
     },
@@ -120,54 +118,54 @@ export default {
             amount: {
                 required,
                 decimal,
-                greater_than_zero,
+                greater_than_zero
             },
             award_address: {
                 required,
-                isAddress(value) {
-                    if (value === '') return true
+                isAddress (value) {
+                    if (value === "") return true
 
                     return new Promise(resolve => {
                         address(value, this.$gateway)
                             .then(() => resolve(true))
                             .catch(e => resolve(false))
-                    });
+                    })
                 }
             }
         }
     },
     watch: {
         stake_status: {
-            handler(val, old){
-                if(val.code == old.code) return
-                switch(this.stake_status.code) {
-                    case 0:
-                        this.$q.notify({
-                            type: "positive",
-                            timeout: 1000,
-                            message: this.stake_status.message
-                        })
-                        this.$v.$reset();
-                        this.service_node = {
-                            key: "",
-                            amount: 0,
-                            award_address: "",
-                        }
-                        break;
-                    case -1:
-                        this.$q.notify({
-                            type: "negative",
-                            timeout: 1000,
-                            message: this.stake_status.message
-                        })
-                        break;
+            handler (val, old) {
+                if (val.code === old.code) return
+                switch (this.stake_status.code) {
+                case 0:
+                    this.$q.notify({
+                        type: "positive",
+                        timeout: 1000,
+                        message: this.stake_status.message
+                    })
+                    this.$v.$reset()
+                    this.service_node = {
+                        key: "",
+                        amount: 0,
+                        award_address: ""
+                    }
+                    break
+                case -1:
+                    this.$q.notify({
+                        type: "negative",
+                        timeout: 1000,
+                        message: this.stake_status.message
+                    })
+                    break
                 }
             },
             deep: true
-        },
+        }
     },
     created () {
-        const { address } = this.info;
+        const { address } = this.info
         if (!this.service_node.award_address || this.service_node.award_address === "") {
             this.service_node.award_address = address || ""
         }
@@ -175,12 +173,10 @@ export default {
     methods: {
         isOurAddress (address) {
             const { primary, used, unused } = this.address_list
-            const addresses = [...primary, ...used, ...unused].map(o => o.address);
-            console.log(addresses);
-            return addresses.includes(address);
+            const addresses = [...primary, ...used, ...unused].map(o => o.address)
+            return addresses.includes(address)
         },
         stake: function () {
-
             this.$v.service_node.$touch()
 
             if (this.$v.service_node.key.$error) {
@@ -201,21 +197,21 @@ export default {
                 return
             }
 
-            if(this.service_node.amount < 0) {
+            if (this.service_node.amount < 0) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
                     message: "Amount cannot be negative"
                 })
                 return
-            } else if(this.service_node.amount == 0) {
+            } else if (this.service_node.amount === 0) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
                     message: "Amount must be greater than zero"
                 })
                 return
-            } else if(this.service_node.amount > this.unlocked_balance / 1e4) {
+            } else if (this.service_node.amount > this.unlocked_balance / 1e4) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
@@ -238,7 +234,7 @@ export default {
                     label: "STAKE",
                     color: "positive"
 
-                },
+                }
             }).then(password => {
                 this.$store.commit("gateway/set_snode_status", {
                     stake: {
@@ -247,10 +243,10 @@ export default {
                         sending: true
                     }
                 })
-                const service_node = objectAssignDeep.noMutate(this.service_node, {password})
+                const service_node = objectAssignDeep.noMutate(this.service_node, { password })
                 this.$gateway.send("wallet", "stake", {
                     ...service_node,
-                    destination: service_node.award_address,
+                    destination: service_node.award_address
                 })
             }).catch(() => {
             })
