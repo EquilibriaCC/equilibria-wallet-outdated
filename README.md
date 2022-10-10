@@ -3,7 +3,7 @@
 ### Introduction
 A Private and Decentralized Oracle Solution
 
-More information on the project can be found on the [website](https://equilibria.network). Equilibria is an open source project, and we encourage contributions from anyone with something to offer.
+More information on the project can be found on the [website](https://equilibriacc.github.io). Equilibria is an open source project, and we encourage contributions from anyone with something to offer.
 
 
 ### About this project
