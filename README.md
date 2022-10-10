@@ -9,7 +9,6 @@ More information on the project can be found on the [website](https://equilibria
 </p>
 
 
-
 ### About this project
 
 This is the new electron GUI for Equilibria. It is open source and completely free to use without restrictions, anyone may create an alternative implementation of the Equilibria Electron GUI that uses the protocol and network in a compatible manner.
@@ -24,7 +23,7 @@ Please submit any changes as pull requests to the development branch, all change
 ```
 nvm use 11.9.0
 npm install -g quasar-cli
-git clone https://github.com/EquilibriaCC/equilibria-wallet
+git clone https://github.com/EquilibriaCC/equilibria-wallet -b development
 cd equilibria-wallet
 cp path_to_equilibria_binaries/daemon bin/
 cp path_to_equilibria_binaries/equilibria-wallet-rpc bin/
