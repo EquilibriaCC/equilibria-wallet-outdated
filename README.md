@@ -18,13 +18,15 @@ Please submit any changes as pull requests to the development branch, all change
 
 #### Commands
 ```
-nvm use 11.9.0
+nvm use 14.27.3
 npm install -g quasar-cli
 git clone https://github.com/EquilibriaCC/equilibria-wallet -b development
 cd equilibria-wallet
 cp path_to_equilibria_binaries/daemon bin/
 cp path_to_equilibria_binaries/equilibria-wallet-rpc bin/
 npm install
+brew install perl (macOS)
+pip3 install ds-store (macOS)
 
 //build
 quasar build -m electron -t mat
