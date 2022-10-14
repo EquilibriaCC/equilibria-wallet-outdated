@@ -10,9 +10,9 @@
                 <q-btn
                     color="primary" style="width:25px;"
                     size="sm" icon="file_copy"
-                    @click="copyPrivateKey('view_key', $event)">
+                    @click="copyAddress(info.address, $event)">
                     <q-tooltip anchor="center left" self="center right" :offset="[5, 10]">
-                        Copy view key
+                        Copy address
                     </q-tooltip>
                 </q-btn>
             </div>
@@ -110,9 +110,43 @@ export default {
             }, 500)
             this.$router.replace({ path: "/wallet" })
         },
+        copyAddress (address, event) {
+            event.stopPropagation()
+            for (let i = 0; i < event.path.length; i++) {
+                console.log(event.path[i].tagName)
+                if (event.path[i].tagName === "BUTTON") {
+                    event.path[i].blur()
+                    break
+                }
+            }
+            clipboard.writeText(address)
+
+            this.$q.dialog({
+                title: "Copy address",
+                message: "Be careful who you send your private keys to as they control your funds.",
+                ok: {
+                    label: "OK",
+                    color: "positive"
+
+                }
+            }).then(() => {
+                this.$q.notify({
+                    type: "positive",
+                    timeout: 1000,
+                    message: "address copied to clipboard"
+                })
+            }).catch(() => {
+                this.$q.notify({
+                    type: "positive",
+                    timeout: 1000,
+                    message: "address copied to clipboard"
+                })
+            })
+        },
         copyPrivateKey (type, event) {
             event.stopPropagation()
             for (let i = 0; i < event.path.length; i++) {
+                console.log(event.path[i].tagName)
                 if (event.path[i].tagName === "BUTTON") {
                     event.path[i].blur()
                     break

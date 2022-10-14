@@ -95,7 +95,8 @@ export class Daemon {
                 "--in-peers", daemon.in_peers,
                 "--limit-rate-up", daemon.limit_rate_up,
                 "--limit-rate-down", daemon.limit_rate_down,
-                "--log-level", daemon.log_level
+                "--log-level", daemon.log_level,
+                "--confirm-external-bind"
             ]
 
             const dirs = {

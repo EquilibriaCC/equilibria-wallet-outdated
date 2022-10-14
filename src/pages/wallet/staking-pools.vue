@@ -261,7 +261,6 @@ export default {
                 { label: "Stake", value: "stake" },
                 { label: "Failed", value: "failed" }
             ]
-
         }
     },
     computed: mapState({
@@ -279,34 +278,34 @@ export default {
     },
     mounted () {
         let stake_data = this.state.gateway.wallet.staker.stake
-
-        if (!stake_data) return
-        let user_pools = []
-        let n_op = 0
-        this.tx_list.map(item => {
-            stake_data.staked_nodes.map(node => {
-                if (item.service_node_pubkey === node.node_key) {
-                    user_pools.push({ ...item, ...node })
-                }
+        if (!stake_data) {
+            let user_pools = []
+            let n_op = 0
+            this.tx_list.map(item => {
+                stake_data.staked_nodes.map(node => {
+                    if (item.service_node_pubkey === node.node_key) {
+                        user_pools.push({ ...item, ...node })
+                    }
+                })
             })
-        })
-        user_pools.map(node => {
-            if (node.is_operator) { n_op++ }
-        })
-        this.num_operating = n_op
-        this.staked_pools = user_pools
-        fetch("https://api.coingecko.com/api/v3/coins/triton?tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false\n")
-            .then(response => response.json())
-            .then(data => {
-                this.current_price = data.market_data.current_price.usd
-                this.$forceUpdate()
+            user_pools.map(node => {
+                if (node.is_operator) { n_op++ }
             })
-        this.stake_data = stake_data
-        this.total_stake_amount = stake_data.total_staked_amount
-        this.num_nodes_staked_to = stake_data.total_nodes_staked_to
-        this.next_unlock = stake_data.lowest_unlock_time_by_block
-        this.daily_reward = (720 / stake_data.total_nodes) * (stake_data.reward) * ((stake_data.total_staked_amount / stake_data.total_nodes_staked_to) / stake_data.avg_staking_req)
-        this.earnings_for_period = this.daily_reward * ((stake_data.avg_unlock_time - stake_data.avg_reg_height) / 720)
+            this.num_operating = n_op
+            this.staked_pools = user_pools
+            fetch("https://api.coingecko.com/api/v3/coins/triton?tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false\n")
+                .then(response => response.json())
+                .then(data => {
+                    this.current_price = data.market_data.current_price.usd
+                    this.$forceUpdate()
+                })
+            this.stake_data = stake_data
+            this.total_stake_amount = stake_data.total_staked_amount
+            this.num_nodes_staked_to = stake_data.total_nodes_staked_to
+            this.next_unlock = stake_data.lowest_unlock_time_by_block
+            this.daily_reward = (720 / stake_data.total_nodes) * (stake_data.reward) * ((stake_data.total_staked_amount / stake_data.total_nodes_staked_to) / stake_data.avg_staking_req)
+            this.earnings_for_period = this.daily_reward * ((stake_data.avg_unlock_time - stake_data.avg_reg_height) / 720)
+        }
     },
     watch: {
         stake_status: {

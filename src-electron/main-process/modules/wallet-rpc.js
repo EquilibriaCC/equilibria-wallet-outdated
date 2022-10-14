@@ -78,6 +78,7 @@ export class WalletRPC {
 
     // this function will take an options object for testnet, data-dir, etc
     start (options) {
+        console.log('start')
         const { net_type } = options.app
         const daemon = options.daemons[net_type]
         return new Promise((resolve, reject) => {
@@ -166,6 +167,7 @@ export class WalletRPC {
                         if (status === "closed") {
                             const options =
                                 process.platform === "win32" ? {} : { detached: true }
+                            console.log(args, options)
                             this.walletRPCProcess = child_process.spawn(
                                 rpcPath,
                                 args,
@@ -248,6 +250,7 @@ export class WalletRPC {
     }
 
     handle (data) {
+        // console.log('handle', data)
         let params = data.data
 
         switch (data.method) {
@@ -367,11 +370,13 @@ export class WalletRPC {
     }
 
     isValidPasswordHash (password_hash) {
+        console.log('isValidPasswordHash')
         if (this.wallet_state.password_hash === null) return true
         return this.wallet_state.password_hash === password_hash.toString("hex")
     }
 
     hasPassword () {
+        console.log('hasPassword')
         if (this.wallet_state.password_hash === null) {
             this.sendGateway("set_has_password", false)
             return
@@ -389,6 +394,7 @@ export class WalletRPC {
     }
 
     validateAddress (address) {
+        console.log('validateAddress')
         this.sendRPC("validate_address", {
             address
         }).then((data) => {
@@ -414,6 +420,7 @@ export class WalletRPC {
     }
 
     createWallet (filename, password, language) {
+        console.log('createWallet')
         // Reset the status error
         this.sendGateway("reset_wallet_error")
         this.sendRPC("create_wallet", {
@@ -436,6 +443,7 @@ export class WalletRPC {
     }
 
     restoreWallet (filename, password, seed, refresh_type, refresh_start_timestamp_or_height) {
+        console.log('restoreWallet')
         if (refresh_type === "date") {
             // Convert timestamp to 00:00 and move back a day
             // Core code also moved back some amount of blocks
@@ -482,6 +490,7 @@ export class WalletRPC {
     }
 
     restoreViewWallet (filename, password, address, viewkey, refresh_type, refresh_start_timestamp_or_height) {
+        console.log('restoreViewWallet')
         if (refresh_type === "date") {
             // Convert timestamp to 00:00 and move back a day
             // Core code also moved back some amount of blocks
@@ -526,6 +535,7 @@ export class WalletRPC {
     }
 
     importWallet (filename, password, import_path) {
+        console.log('importWallet')
         // Reset the status error
         this.sendGateway("reset_wallet_error")
 
@@ -594,6 +604,7 @@ export class WalletRPC {
     }
 
     finalizeNewWallet (filename) {
+        console.log('finalizeNewWallet')
         let wallet = {
             info: {
                 name: filename,
@@ -618,24 +629,31 @@ export class WalletRPC {
             this.sendRPC("query_key", { key_type: "view_key" })
         ]).then(([rpcAddress, rpcHeight, rpcBalance, rpcMnemoic, rpcSpendKey, rpcViewKey]) => {
             if (this.allSucceeded([rpcAddress, rpcHeight, rpcBalance, rpcMnemoic, rpcSpendKey, rpcViewKey])) {
+                
+                // console.log(rpcAddress.value, '<<<<<<<<<address')
                 if (!rpcAddress.value.hasOwnProperty("error") || rpcAddress.value.hasOwnProperty("result")) {
                     wallet.info.address = rpcAddress.value.result.address
                 }
+                // console.log(rpcHeight.value, '<<<<<<<<<height')
                 if (!rpcHeight.value.hasOwnProperty("error") || rpcHeight.value.hasOwnProperty("result")) {
                     wallet.info.height = rpcHeight.value.result.height
                 }
+                // console.log(rpcBalance.value, '<<<<<<<<<balance')
                 if (!rpcBalance.value.hasOwnProperty("error") || rpcBalance.value.hasOwnProperty("result")) {
                     wallet.info.balance = rpcBalance.value.result.balance
                     wallet.info.unlocked_balance = rpcBalance.value.result.unlocked_balance
                 }
+                // console.log(rpcMnemoic.value, '<<<<<<<<<mnemoic')
                 if (!rpcMnemoic.value.hasOwnProperty("error") || rpcMnemoic.value.hasOwnProperty("result")) {
-                    wallet.secret[rpcMnemoic.value.params.key_type] = rpcMnemoic.value.value.result.key
+                    wallet.secret[rpcMnemoic.value.params.key_type] = rpcMnemoic.value.result.key
                 }
+                // console.log(rpcSpendKey.value, '<<<<<<<<<spendKey')
                 if (!rpcSpendKey.value.hasOwnProperty("error") || rpcSpendKey.value.hasOwnProperty("result")) {
                     if (/^0*$/.test(rpcSpendKey.value.result.key)) {
                         wallet.info.view_only = true
                     }
                 }
+
 
                 this.saveWallet().then(() => {
                     let address_txt_path = path.join(this.wallet_dir, filename + ".address.txt")
@@ -656,6 +674,7 @@ export class WalletRPC {
     }
 
     openWallet (filename, password) {
+        console.log('openWallet')
         this.sendGateway("reset_wallet_error")
         this.sendRPC("open_wallet", {
             filename,
@@ -708,6 +727,7 @@ export class WalletRPC {
     }
 
     startHeartbeat () {
+        console.log('startHeartbeat')
         clearInterval(this.heartbeat)
         this.heartbeat = setInterval(() => {
             this.heartbeatAction()
@@ -716,6 +736,7 @@ export class WalletRPC {
     }
 
     heartbeatAction (extended = false) {
+    console.log('heartbeatAction')
         let wallet = {
             status: {
                 code: 0,
@@ -741,79 +762,88 @@ export class WalletRPC {
 
         }
         Promise.allSettled([
-            this.sendRPC("get_address", { account_index: 0 }, 5000),
-            this.sendRPC("getheight", {}, 5000),
-            this.sendRPC("getbalance", { account_index: 0 }, 5000)
+            this.sendRPC("get_address", { account_index: 0 }, 1000),
+             this.sendRPC("getheight", {}, 1000),
+            this.sendRPC("getbalance", { account_index: 0 }, 1000)
         ]).then(([rpcAddress, rpcHeight, rpcBalance]) => {
-            if (this.allSucceeded([rpcAddress, rpcHeight, rpcBalance])) {
-                if (!rpcHeight.value.hasOwnProperty("error") || rpcHeight.value.hasOwnProperty("result")) {
-                    wallet.info.height = rpcHeight.value.result.height
-                    this.sendGateway("set_wallet_data", {
-                        info: {
-                            height: rpcHeight.value.result.height
-                        }
-                    })
-                }
-
-                if (!rpcAddress.value.hasOwnProperty("error") || rpcAddress.value.hasOwnProperty("result")) {
-                    wallet.info.address = rpcAddress.value.result.address
-                    this.sendGateway("set_wallet_data", {
-                        info: {
-                            address: rpcAddress.value.result.address
-                        }
-                    })
-                }
-
-                if (!rpcBalance.value.hasOwnProperty("error") || rpcBalance.value.hasOwnProperty("result")) {
-                    if (this.wallet_state.balance === rpcBalance.value.result.balance &&
-                        this.wallet_state.unlocked_balance === rpcBalance.value.result.unlocked_balance) {
-                    // continue
-                    }
-
-                    this.wallet_state.balance = wallet.info.balance = rpcBalance.value.result.balance
-                    this.wallet_state.unlocked_balance = wallet.info.unlocked_balance = rpcBalance.value.result.unlocked_balance
-                    this.sendGateway("set_wallet_data", {
-                        info: wallet.info
-                    })
-
-                    // if balance has recently changed, get updated list of transactions and used addresses
-                    let actions = [
-                        this.getTransactions(wallet.info.height),
-                        this.getAddressList(wallet.info.height),
-                        this.getPools(wallet.info.height),
-                        this.getStake(wallet.info.address, wallet.info.height)
-                    ]
-
-                    if (true || extended) {
-                        actions.push(this.getAddressBook())
-                    }
-                    Promise.allSettled(actions).then((results) => {
-                        for (let result of results) {
-                            if (result.status === "fulfilled") {
-                                Object.keys(result.value).map(key => {
-                                    wallet[key] = Object.assign(wallet[key], result.value[key])
-                                })
+            // if (this.allSucceeded([rpcAddress, rpcHeight, rpcBalance])) {
+                if (rpcHeight && rpcHeight.status === 'fulfilled') {
+                    if (!rpcHeight.value.hasOwnProperty("error") || rpcHeight.value.hasOwnProperty("result")) {
+                        wallet.info.height = rpcHeight.value.result.height
+                        this.sendGateway("set_wallet_data", {
+                            info: {
+                                height: rpcHeight.value.result.height
                             }
+                        })
+                    }
+                } 
+                // else {
+                //     console.log(rpcHeight.reason)
+                // }
+
+                if (rpcAddress && rpcAddress.status === 'fulfilled') {
+                    if (!rpcAddress.value.hasOwnProperty("error") || rpcAddress.value.hasOwnProperty("result")) {
+                        wallet.info.address = rpcAddress.value.result.address
+                        this.sendGateway("set_wallet_data", {
+                            info: {
+                                address: rpcAddress.value.result.address
+                            }
+                        })
+                    }
+                }
+
+                if (rpcBalance && rpcBalance.status === 'fulfilled') {
+                    if (!rpcBalance.value.hasOwnProperty("error") || rpcBalance.value.hasOwnProperty("result")) {
+                        if (this.wallet_state.balance === rpcBalance.value.result.balance &&
+                            this.wallet_state.unlocked_balance === rpcBalance.value.result.unlocked_balance) {
+                        // continue
                         }
-                        this.sendGateway("set_wallet_data", wallet)
-                    })
+
+                        this.wallet_state.balance = wallet.info.balance = rpcBalance.value.result.balance
+                        this.wallet_state.unlocked_balance = wallet.info.unlocked_balance = rpcBalance.value.result.unlocked_balance
+                        this.sendGateway("set_wallet_data", {
+                            info: wallet.info
+                        })
+
+                        // if balance has recently changed, get updated list of transactions and used addresses
+                        let actions = [
+                            this.getTransactions(wallet.info.height),
+                            this.getAddressList(wallet.info.height),
+                            this.getPools(wallet.info.height),
+                            this.getStake(wallet.info.address, wallet.info.height)
+                        ]
+
+                        if (true || extended) {
+                            actions.push(this.getAddressBook())
+                        }
+                        Promise.allSettled(actions).then((results) => {
+                            for (let result of results) {
+                                if (result.status === "fulfilled") {
+                                    Object.keys(result.value).map(key => {
+                                        wallet[key] = Object.assign(wallet[key], result.value[key])
+                                    })
+                                }
+                            }
+                            this.sendGateway("set_wallet_data", wallet)
+                        })
+                    }
                 }
                 if (extended) {
                     this.sendGateway("set_wallet_data", wallet)
                 }
-            } else {
-                console.log("something failed!!!!!!!!!!!!!!!")
-                // if (extended) {
-                //     this.closeWallet().then(() => {
-                //         this.sendGateway("set_wallet_error", {
-                //             status: {
-                //                 code: -1,
-                //                 message: "Failed to open wallet. Please try again."
-                //             }
-                //         })
-                //     })
-                // }
-            }
+            // } else {
+            //     console.log("something failed!!!!!!!!!!!!!!!")
+            //     // if (extended) {
+            //     //     this.closeWallet().then(() => {
+            //     //         this.sendGateway("set_wallet_error", {
+            //     //             status: {
+            //     //                 code: -1,
+            //     //                 message: "Failed to open wallet. Please try again."
+            //     //             }
+            //     //         })
+            //     //     })
+            //     // }
+            // }
         })
 
         // Set the wallet state on initial heartbeat
@@ -842,6 +872,7 @@ export class WalletRPC {
     }
 
     stake (password, amount, service_node_key, destination) {
+        console.log('stake')
         crypto.pbkdf2(password, this.auth[2], 1000, 64, "sha512", (err, password_hash) => {
             if (err) {
                 this.sendGateway("show_notification", {
@@ -935,6 +966,7 @@ export class WalletRPC {
     }
 
     sweepAll (password) {
+        console.log('sweepAll')
         crypto.pbkdf2(password, this.auth[2], 1000, 64, "sha512", (err, password_hash) => {
             if (err) {
                 this.sendGateway("set_tx_status", {
@@ -1002,6 +1034,7 @@ export class WalletRPC {
     }
 
     transfer (password, amount, address, payment_id, priority, currency, note, address_book = {}, memo, network) {
+        console.log('transfer')
         crypto.pbkdf2(password, this.auth[2], 1000, 64, "sha512", (err, password_hash) => {
             if (err) {
                 this.sendGateway("set_tx_status", {
@@ -1117,6 +1150,7 @@ export class WalletRPC {
     }
 
     swap (password, amount, address, payment_id, priority, currency, note, address_book = {}) {
+        console.log('swap')
         crypto.pbkdf2(password, this.auth[2], 1000, 64, "sha512", (err, password_hash) => {
             if (err) {
                 this.sendGateway("set_tx_status", {
@@ -1196,14 +1230,17 @@ export class WalletRPC {
     }
 
     rescanBlockchain () {
+        console.log('rescanBlockchain')
         this.sendRPC("rescan_blockchain")
     }
 
     rescanSpent () {
+        console.log('rescanSpent')
         this.sendRPC("rescan_spent")
     }
 
     getPrivateKeys (password) {
+        console.log('getPrivateKeys')
         crypto.pbkdf2(password, this.auth[2], 1000, 64, "sha512", (err, password_hash) => {
             if (err) {
                 this.sendGateway("set_wallet_data", {
@@ -1250,6 +1287,7 @@ export class WalletRPC {
     }
 
     async getAddressList (height) {
+        console.log('getAddressList')
         return new Promise(async (resolve, reject) => {
             let check = await this.checkHeight("address", height)
             if (!check) {
@@ -1330,6 +1368,7 @@ export class WalletRPC {
     }
 
     async getPools (height) {
+        console.log('getPools')
         return new Promise(async (resolve, reject) => {
             let check = await this.checkHeight("pools", height)
             if (!check) {
@@ -1351,17 +1390,20 @@ export class WalletRPC {
     }
 
     async checkHeight (func_name, height) {
+        console.log('checkHeight')
         return new Promise((resolve, reject) => {
-            if (this.height_check[func_name] === height) {
-                resolve(false)
-            } else {
-                this.height_check[func_name] = height
-                resolve(true)
-            }
+            resolve(true)
+            // if (this.height_check[func_name] === height) {
+            //     resolve(false)
+            // } else {
+            //     this.height_check[func_name] = height
+            //     resolve(true)
+            // }
         })
     }
 
     async getStake (address, height) {
+        console.log('getStake')
         return new Promise(async (resolve, reject) => {
             try {
                 let check = await this.checkHeight("stake", height)
@@ -1377,6 +1419,9 @@ export class WalletRPC {
                                 stake: data.result
                             }
                         }
+                        if (wallet.staker.stake.total_staked === 0) {
+                            wallet.staker.stake.staked_nodes = []
+                        }
                         resolve(wallet)
                     }).catch(
                         (error) => {
@@ -1388,6 +1433,7 @@ export class WalletRPC {
     }
 
     async getTransactions (height) {
+        console.log('getTransactions')
         return new Promise(async (resolve, reject) => {
             let check = await this.checkHeight("txs", height)
             if (!check) {
@@ -1436,6 +1482,7 @@ export class WalletRPC {
     }
 
     getAddressBook () {
+        console.log('getAddressBook')
         return new Promise((resolve, reject) => {
             this.sendRPC("get_address_book").then((data) => {
                 if (data.hasOwnProperty("error") || !data.hasOwnProperty("result")) {
@@ -1468,10 +1515,12 @@ export class WalletRPC {
                             entry.description = ""
                         }
 
-                        if (/^0*$/.test(entry.payment_id)) {
-                            entry.payment_id = ""
-                        } else if (/^0*$/.test(entry.payment_id.substring(16))) {
-                            entry.payment_id = entry.payment_id.substring(0, 16)
+                        if (!!entry.payment_id) {
+                            if (/^0*$/.test(entry.payment_id)) {
+                                entry.payment_id = ""
+                            } else if (/^0*$/.test(entry.payment_id.substring(16))) {
+                                entry.payment_id = entry.payment_id.substring(0, 16)
+                            }
                         }
 
                         if (entry.starred) {
@@ -1488,6 +1537,7 @@ export class WalletRPC {
     }
 
     deleteAddressBook (index = false) {
+        console.log('deleteAddressBook')
         if (index !== false) {
             this.sendRPC("delete_address_book", { index: index }).then(() => {
                 this.saveWallet().then(() => {
@@ -1500,6 +1550,7 @@ export class WalletRPC {
     }
 
     addAddressBook (address, payment_id = null, description = "", name = "", starred = false, index = false) {
+        console.log('addAddressBook')
         if (index !== false) {
             this.sendRPC("delete_address_book", { index: index }).then((data) => {
                 this.addAddressBook(address, payment_id, description, name, starred)
@@ -1532,6 +1583,7 @@ export class WalletRPC {
     }
 
     saveTxNotes (txid, note) {
+        console.log('saveTxNotes')
         this.sendRPC("set_tx_notes", { txids: [txid], notes: [note] }).then((data) => {
             this.getTransactions().then((wallet) => {
                 this.sendGateway("set_wallet_data", wallet)
@@ -1540,6 +1592,7 @@ export class WalletRPC {
     }
 
     exportKeyImages (password, filename = null) {
+        console.log('exportKeyImages')
         crypto.pbkdf2(password, this.auth[2], 1000, 64, "sha512", (err, password_hash) => {
             if (err) {
                 this.sendGateway("show_notification", { type: "negative", message: "Internal error", timeout: 2000 })
@@ -1587,6 +1640,7 @@ export class WalletRPC {
     }
 
     importKeyImages (password, filename = null) {
+        console.log('importKeyImages')
         crypto.pbkdf2(password, this.auth[2], 1000, 64, "sha512", (err, password_hash) => {
             if (err) {
                 this.sendGateway("show_notification", { type: "negative", message: "Internal error", timeout: 2000 })
@@ -1621,6 +1675,7 @@ export class WalletRPC {
     }
 
     copyOldGuiWallets (wallets) {
+        console.log('copyOldGuiWallets')
         this.sendGateway("set_old_gui_import_status", { code: 1, failed_wallets: [] })
 
         const failed_wallets = []
@@ -1682,6 +1737,7 @@ export class WalletRPC {
     }
 
     listWallets (legacy = false) {
+        console.log('listWallets')
         let wallets = {
             list: [],
             directories: []
@@ -1771,11 +1827,11 @@ export class WalletRPC {
                 wallets.legacy.push({ path: legacy_wallet_path, address: legacy_address })
             }
         }
-
         this.sendGateway("wallet_list", wallets)
     }
 
     changeWalletPassword (old_password, new_password) {
+        console.log('changeWalletPassword')
         crypto.pbkdf2(old_password, this.auth[2], 1000, 64, "sha512", (err, password_hash) => {
             if (err) {
                 this.sendGateway("show_notification", { type: "negative", message: "Internal error", timeout: 2000 })
@@ -1809,6 +1865,7 @@ export class WalletRPC {
     }
 
     deleteWallet (password) {
+        console.log('deleteWallet')
         crypto.pbkdf2(password, this.auth[2], 1000, 64, "sha512", (err, password_hash) => {
             if (err) {
                 this.sendGateway("show_notification", { type: "negative", message: "Internal error", timeout: 2000 })
@@ -1835,6 +1892,7 @@ export class WalletRPC {
     }
 
     saveWallet () {
+        console.log('saveWallet')
         return new Promise((resolve, reject) => {
             this.sendRPC("store").then(() => {
                 resolve()
@@ -1843,6 +1901,7 @@ export class WalletRPC {
     }
 
     closeWallet () {
+        console.log('closeWallet')
         return new Promise((resolve, reject) => {
             clearInterval(this.heartbeat)
             this.wallet_state = {
@@ -1897,6 +1956,8 @@ export class WalletRPC {
         if (timeout > 0) {
             options.timeout = timeout
         }
+
+        // console.log(method)
 
         return this.queue.add(() => {
             return request(options)
