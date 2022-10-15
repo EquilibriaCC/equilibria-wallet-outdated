@@ -11,6 +11,19 @@ const path = require("upath")
 const objectAssignDeep = require("object-assign-deep")
 const execSync = require("child_process").execSync
 
+Promise.allSettled = Promise.allSettled || ((promises) => Promise.all(
+    promises.map(p => p
+        .then(value => ({
+            status: "fulfilled",
+            value
+        }))
+        .catch(reason => ({
+            status: "rejected",
+            reason
+        }))
+    )
+))
+
 export class Backend {
     constructor (mainWindow) {
         this.mainWindow = mainWindow
@@ -97,7 +110,7 @@ export class Backend {
                 net_type: "mainnet"
             },
             wallet: {
-                rpc_bind_port: 18082,
+                rpc_bind_port: 9999,
                 log_level: 0
             }
         }
@@ -552,30 +565,12 @@ export class Backend {
                         })
                     }
 
-                    async function killPort () {
-                        try {
-                            let pid = execSync("lsof -i tcp:18082 | tail -n +2 | awk '{print $2}'", { encoding: "utf-8" })
-                            if (pid) {
-                                pid = pid.toString().split("\\s")
-                                if (!isNaN(pid)) {
-                                    pid = Number(pid)
-                                    execSync(`kill -9 ${pid}`, { encoding: "utf-8" })
-                                }
-                            }
-                        } catch (error) {
-                        }
-                    }
-
-                    killPort()
-
                     this.daemon.start(this.config_data).then(() => {
                         this.send("set_app_data", {
                             status: {
                                 code: 6 // Starting wallet
                             }
                         })
-
-                        killPort()
 
                         this.walletd.start(this.config_data).then(() => {
                             this.send("set_app_data", {
@@ -631,21 +626,39 @@ export class Backend {
     }
 
     quit () {
-        return new Promise((resolve, reject) => {
-            let process = []
-            if (this.daemon) {
-                process.push(this.daemon.quit())
+        return new Promise(async (resolve, reject) => {
+            //let process = []
+            try {
+                if (this.walletd) {
+                    // process.push(this.walletd.quit())
+                    await this.walletd.quit()
+                    this.walletd = null
+                }
+                if (this.wss) {
+                    this.wss.close()
+                    this.wss = null
+                }
+                if (this.daemon) {
+                    //process.push(this.daemon.quit())
+                    await this.daemon.quit()
+                    this.daemon = null
+                }
+                this.scee = null
+                this.mainWindow = null
+            } catch (error) {
+                
             }
-            if (this.walletd) {
-                process.push(this.walletd.quit())
-            }
-            if (this.wss) {
-                this.wss.close()
+            finally {
+                console.log('backend quit close>>>>>>>>>>')
+                resolve()
             }
 
-            Promise.all(process).then(() => {
-                resolve()
-            })
+            // Promise.allSettled(process)
+            // .finally(([daemonProcess, walletProcess]) => {
+            //     console.log(daemonProcess.status, 'backend quit daemon process')
+            //     console.log('backend quit close>>>>>>>>>>')
+            //     resolve()
+            // })
         })
     }
 

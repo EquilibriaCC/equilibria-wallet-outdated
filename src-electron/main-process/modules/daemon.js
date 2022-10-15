@@ -166,7 +166,7 @@ export class Daemon {
                                     // Ignore
                                 } else {
                                     clearInterval(intrvl)
-                                    this.killProcess()
+                                    // this.killProcess()
                                     reject(new Error("Could not connect to local daemon"))
                                 }
                             }
@@ -428,19 +428,39 @@ export class Daemon {
     }
 
     quit () {
-        clearInterval(this.heartbeat)
+        console.log('daemon quit>>>>>>>>>>')
+        this.backend = null
+        if (this.heartbeat) {
+            clearInterval(this.heartbeat)
+            this.heartbeat = null
+        }
+        if (this.heartbeat_slow) {
+            clearInterval(this.heartbeat_slow)
+        }
+        if (this.agent) {
+            this.agent.destroy()
+        }
+        if (this.queue) {
+            while(this.queue.getPendingLength() > 0) {
+                this.queue._dequeue()
+            }
+        }
         return new Promise((resolve, reject) => {
             if (this.daemonProcess) {
                 this.daemonProcess.on("close", code => {
-                    this.agent.destroy()
+                    console.log('daemon quit close>>>>>>>>>>')
+                    this.daemonProcess = null
                     resolve()
                 })
                 this.daemonProcess.kill()
             } else {
+                console.log('daemon quit else>>>>>>>>>>')
                 resolve()
             }
         })
     }
 
-    killProcess () {}
+    killProcess () {
+        console.log('daemon killProcess>>>>>>>>>>')
+    }
 }

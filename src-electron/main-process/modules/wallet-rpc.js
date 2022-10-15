@@ -25,6 +25,7 @@ Promise.allSettled = Promise.allSettled || ((promises) => Promise.all(
 
 export class WalletRPC {
     constructor (backend) {
+        this.isQuitting = false
         this.backend = backend
         this.data_dir = null
         this.wallet_dir = null
@@ -41,6 +42,7 @@ export class WalletRPC {
         this.confirmed_stake = false
         this.cancel_stake = false
         this.wallet_state = {
+            address: '',
             open: false,
             name: "",
             password_hash: null,
@@ -141,7 +143,7 @@ export class WalletRPC {
                     this.walletRPCProcess = child_process.spawn(path.join(global.__ryo_bin, "wallet-rpc.exe"), args)
                 } else {
                     this.walletRPCProcess = child_process.spawn(path.join(global.__ryo_bin, "wallet-rpc"), args, {
-                        detached: true
+                        detached: false
                     })
                 }
 
@@ -167,13 +169,13 @@ export class WalletRPC {
                         if (status === "closed") {
                             const options =
                                 process.platform === "win32" ? {} : { detached: true }
-                            console.log(args, options)
+                            if (this.walletRPCProcess)
+                                this.walletRPCProcess = null
                             this.walletRPCProcess = child_process.spawn(
                                 rpcPath,
                                 args,
                                 options
                             )
-
                             this.walletRPCProcess.stdout.on("data", data => {
                                 process.stdout.write(`Wallet: ${data}`)
 
@@ -207,13 +209,19 @@ export class WalletRPC {
                                     })
                                 }
                             })
-                            this.walletRPCProcess.on("error", err =>
+                            this.walletRPCProcess.on("error", err => {
                                 process.stderr.write(`Wallet: ${err}`)
-                            )
+                                this.walletRPCProcess = null
+                                if (this.agent) {
+                                    this.agent.destroy()
+                                }
+                            })
                             this.walletRPCProcess.on("close", code => {
                                 process.stderr.write(`Wallet: exited with code ${code} \n`)
                                 this.walletRPCProcess = null
-                                this.agent.destroy()
+                                if (this.agent) {
+                                    this.agent.destroy()
+                                }
                                 if (code === null) {
                                     reject(new Error("Failed to start wallet RPC"))
                                 }
@@ -221,25 +229,38 @@ export class WalletRPC {
 
                             // To let caller know when the wallet is ready
                             let intrvl = setInterval(() => {
-                                this.sendRPC("get_languages").then(data => {
-                                    if (!data.hasOwnProperty("error")) {
-                                        clearInterval(intrvl)
-                                        resolve()
-                                    } else {
-                                        if (
-                                            this.walletRPCProcess &&
-                                            data.error.cause &&
-                                            data.error.cause.code === "ECONNREFUSED"
-                                        ) {
-                                            // Ignore
-                                        } else {
+                                if (!this.isQuitting) {
+                                    this.sendRPC("get_languages").then(data => {
+                                        if (!data.hasOwnProperty("error")) {
                                             clearInterval(intrvl)
-                                            if (this.walletRPCProcess) this.walletRPCProcess.kill()
-                                            this.walletRPCProcess = null
-                                            reject(new Error("Could not connect to wallet RPC"))
+                                            resolve()
+                                        } else {
+                                            if (
+                                                this.walletRPCProcess &&
+                                                data.error.cause &&
+                                                data.error.cause.code === "ECONNREFUSED"
+                                            ) {
+                                                // Ignore unless quit has been called
+                                                if (this.isQuitting) {
+                                                    if (this.walletRPCProcess) this.walletRPCProcess.kill()
+                                                    this.walletRPCProcess = null
+                                                    clearInterval(intrvl)
+                                                    resolve()
+                                                }
+                                            } else {
+                                                clearInterval(intrvl)
+                                                if (this.walletRPCProcess) this.walletRPCProcess.kill()
+                                                this.walletRPCProcess = null
+                                                reject(new Error("Could not connect to wallet RPC"))
+                                            }
                                         }
-                                    }
-                                })
+                                    })
+                                } else {
+                                    if (this.walletRPCProcess) this.walletRPCProcess.kill()
+                                    this.walletRPCProcess = null
+                                    clearInterval(intrvl)
+                                    resolve()
+                                }
                             }, 1000)
                         } else {
                             reject(new Error(`Wallet RPC port ${this.port} is in use`))
@@ -633,6 +654,7 @@ export class WalletRPC {
                 // console.log(rpcAddress.value, '<<<<<<<<<address')
                 if (!rpcAddress.value.hasOwnProperty("error") || rpcAddress.value.hasOwnProperty("result")) {
                     wallet.info.address = rpcAddress.value.result.address
+                    this.wallet_state.address  = rpcAddress.value.result.address
                 }
                 // console.log(rpcHeight.value, '<<<<<<<<<height')
                 if (!rpcHeight.value.hasOwnProperty("error") || rpcHeight.value.hasOwnProperty("result")) {
@@ -784,6 +806,7 @@ export class WalletRPC {
                 if (rpcAddress && rpcAddress.status === 'fulfilled') {
                     if (!rpcAddress.value.hasOwnProperty("error") || rpcAddress.value.hasOwnProperty("result")) {
                         wallet.info.address = rpcAddress.value.result.address
+                        this.wallet_state.address = rpcAddress.value.result.address
                         this.sendGateway("set_wallet_data", {
                             info: {
                                 address: rpcAddress.value.result.address
@@ -1367,6 +1390,32 @@ export class WalletRPC {
         })
     }
 
+    /*
+    {
+            pool_list: [
+                    {
+                            contributors: [
+                                    {
+                                            address: "Tw1RpbLquGD14KbGuV5TN3QqnMaQCyjmJGVKUgNqNWSACTWb6zswQrS7D1p7NwcQQXYf3MDvBiVoTQTUwL5UgJtG25qQdYGZb",
+                                            amount: 350000000,
+                                            reserved: 350000000
+                                    }
+                            ],
+                            is_pool: false,
+                            last_reward_block_height: 939051,
+                            last_reward_transaction_index: 4294967295,
+                            last_uptime_proof: 0,
+                            operator_address: "Tw1RpbLquGD14KbGuV5TN3QqnMaQCyjmJGVKUgNqNWSACTWb6zswQrS7D1p7NwcQQXYf3MDvBiVoTQTUwL5UgJtG25qQdYGZb",
+                            portions_for_operator: 18446744073709552000,
+                            registration_height: 938947,
+                            service_node_pubkey: "fd30752a83e489774194d4f65bee1a0539154e941323f9dc377cf7422e281dfc",
+                            staking_requirement: 1000000000,
+                            total_contributed: 350000000,
+                            total_reserved: 350000000
+                    }
+            ]
+    }
+    */
     async getPools (height) {
         console.log('getPools')
         return new Promise(async (resolve, reject) => {
@@ -1376,17 +1425,44 @@ export class WalletRPC {
             }
             this.backend.daemon.sendRPC("get_service_nodes")
                 .then((data) => {
+                    // data.result.service_node_states[95].operator_address = 'Tw1AXwU3z9kjMc5z21PaZ6HfQAJXmJbpWC6rdQtW7jw3Agp4t47UokKKTVkcXUTjYo4wtfu9nY87v1uJhKEpEpJv2DdeqLpwj'
+                    // data.result.service_node_states[10].operator_address = 'Tw1AXwU3z9kjMc5z21PaZ6HfQAJXmJbpWC6rdQtW7jw3Agp4t47UokKKTVkcXUTjYo4wtfu9nY87v1uJhKEpEpJv2DdeqLpwj'
+                    // if (data.result.service_node_states && data.result.service_node_states.length > 0) {
+                    //     data.result.service_node_states.sort(this.poolListAddressSorter(this.wallet_state.address))
+                    // }
                     let wallet = {
                         pools: {
                             pool_list: data.result.service_node_states
                         }
                     }
+                    if (!wallet.pools.pool_list) {
+                        wallet.pools.pool_list = []
+                    }
+                    wallet.pools.pool_list.sort(this.poolListAddressSorter(this.wallet_state.address))
+
+
+                    // wallet.pools.pool_list.splice(5)
+                    // console.log(JSON.stringify(wallet.pools.pool_list, null, '\t'))
+
                     resolve(wallet)
                 }).catch(
                     (error) => {
                     }
                 )
         })
+    }
+
+    poolListAddressSorter = (address) => (poolA, poolB) => {
+        if (poolA.operator_address === address && poolB.operator_address === address) {
+            poolA.is_operator = true
+            poolB.is_operator = true
+            return 0
+        }
+        else {
+            poolA.is_operator = false
+            poolB.is_operator = false
+        }
+        return poolA.operator_address === address ? -1 : 1
     }
 
     async checkHeight (func_name, height) {
@@ -1419,6 +1495,7 @@ export class WalletRPC {
                                 stake: data.result
                             }
                         }
+                        // console.log(data)
                         if (wallet.staker.stake.total_staked === 0) {
                             wallet.staker.stake.staked_nodes = []
                         }
@@ -1894,16 +1971,16 @@ export class WalletRPC {
     saveWallet () {
         console.log('saveWallet')
         return new Promise((resolve, reject) => {
-            this.sendRPC("store").then(() => {
-                resolve()
-            })
+            this.sendRPC("store", {}, 1000)
+                .finally(() => {
+                    resolve()
+                })
         })
     }
 
     closeWallet () {
         console.log('closeWallet')
         return new Promise((resolve, reject) => {
-            clearInterval(this.heartbeat)
             this.wallet_state = {
                 open: false,
                 name: "",
@@ -1912,11 +1989,13 @@ export class WalletRPC {
                 unlocked_balance: null
             }
 
-            this.saveWallet().then(() => {
-                this.sendRPC("close_wallet").then(() => {
-                    resolve()
+            this.saveWallet()
+                .finally(() => {
+                    this.sendRPC("close_wallet", {}, 1000)
+                        .finally(() => {
+                            resolve()
+                        })
                 })
-            })
         })
     }
 
@@ -1993,6 +2072,21 @@ export class WalletRPC {
     }
 
     quit () {
+        console.log('wallet quit>>>>>>>>>>')
+        this.isQuitting = true
+        this.backend  = null
+        if (this.heartbeat) {
+            clearInterval(this.heartbeat)
+            this.heartbeat = null
+        }
+        if (this.agent) {
+            this.agent.destroy()
+        }
+        if (this.queue) {
+            while(this.queue.getPendingLength() > 0) {
+                this.queue._dequeue()
+            }
+        }
         return new Promise((resolve, reject) => {
             if (this.walletRPCProcess) {
                 this.closeWallet().then(() => {
@@ -2000,10 +2094,17 @@ export class WalletRPC {
                     // however if the wallet is not responsive to RPC
                     // requests then we must forcefully close it below
                 })
-                setTimeout(() => {
+                let t1 = setTimeout(() => {
                     this.walletRPCProcess.on("close", code => {
-                        this.agent.destroy()
                         clearTimeout(this.forceKill)
+                        clearTimeout(t1)
+                        console.log('wallet quit close>>>>>>>>>>')
+                        resolve()
+                    })
+                    this.walletRPCProcess.on("error", code => {
+                        clearTimeout(this.forceKill)
+                        clearTimeout(t1)
+                        console.log('wallet quit error>>>>>>>>>>')
                         resolve()
                     })
                     // Force kill after 20 seconds
@@ -2016,6 +2117,7 @@ export class WalletRPC {
                     this.walletRPCProcess.kill(signal)
                 }, 2500)
             } else {
+                console.log('wallet quit else>>>>>>>>>>')
                 resolve()
             }
         })

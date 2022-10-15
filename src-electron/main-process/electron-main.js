@@ -176,18 +176,25 @@ app.on("activate", () => {
     }
 })
 
-app.on("before-quit", () => {
-    if (process.platform === "darwin") {
-        forceQuit = true
-    } else {
-        if (backend) {
-            backend.quit().then(() => {
-                mainWindow.close()
-            })
+app.on("before-quit", async () => {
+    try {
+        if (process.platform === "darwin") {
+            forceQuit = true
+        } else {
+            if (backend) {
+                await backend.quit()
+                backend = null
+                console.log('electron before-quit then>>>>>>>>>>')
+            }
         }
+    } catch (error) {
+        console.log('electron before-quit exception', error)
     }
 })
 
-app.on("quit", () => {
-
+app.on("quit", async () => {
+    console.log('electron quit close>>>>>>>>>>')
+    backend = null
+    await mainWindow.close()
+    app.quit()
 })
