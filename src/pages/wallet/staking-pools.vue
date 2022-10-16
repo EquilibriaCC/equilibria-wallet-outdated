@@ -8,9 +8,13 @@
                 <h5 style="padding-top:0px;margin:1%;text-align: left;">Total Nodes:
                     {{ (tx_list.length.toLocaleString()) }}
                 </h5>
-                <h5 style="padding-top:0px;margin:1%;text-align: justify;">Monthly Yield:
+                <h5 v-if="tx_list.length != 0" style="padding-top:0px;margin:1%;text-align: justify;">Monthly Yield:
                     {{
                         Number((((720 / tx_list.length) * 5.4 * 30) / (tx_list[0].staking_requirement / 1e4) * 100).toFixed(2)).toLocaleString()
+                    }}%</h5>
+                <h5 v-if="tx_list.length === 0" style="padding-top:0px;margin:1%;text-align: justify;">Monthly Yield:
+                    {{
+                        Number(0).toLocaleString()
                     }}%</h5>
                 <h5 style="padding-top:0px;margin:1%;text-align: justify;"> Monthly Reward:
                     {{ (Number(((720 / tx_list.length) * 5.4) * 30)).toLocaleString() }} XEQ
@@ -62,15 +66,13 @@
             <div style="padding-top: 5px; margin-left: auto; margin-right: auto" class="tx-list">
                 <div class="row justify-center">
                     <div v-for="item in staked_pools" :key="item.service_node_pubkey">
-                        <div class="col-2" style="padding: 4%; ">
-                            <div
-                                style="background-color: #222222; border-radius: 5px;margin:auto; padding: 50px;padding-top:5px;padding-bottom:5px; -webkit-box-shadow: 0px 0px 21px -1px #005BC6;
-box-shadow: 0px 0px 21px -1px #005BC6">
+                        <div class="col-2" style="padding: 2em; ">
+                            <div :class="{'contributor': true}">
                                 <h6 class="type" style="color:white">
                                     Oracle Node ID: <br/>{{
-                                        item.service_node_pubkey.substring(0, 4)
+                                        item.service_node_pubkey.splice(0, 4)
                                     }}...{{
-                                        item.service_node_pubkey.substring(item.service_node_pubkey.length - 5, item.service_node_pubkey.length - 1)
+                                        item.service_node_pubkey.splice(-4)
                                     }}
                                 </h6>
                                 <p class="main" style="color:white">
@@ -100,15 +102,14 @@ box-shadow: 0px 0px 21px -1px #005BC6">
                                                label="Stake"/>
                                     </q-field>
                                 </div>
+                                <div>Contributor</div>
                                 <div v-if="!isFull(item.contributors)">
-
-                                    <div style="padding-bottom: 75px"/>
+                                    <div style="padding-bottom: 2em"/>
                                 </div>
-
                             </div>
                         </div>
 
-                        <div style="padding-top: 5px"/>
+                        <div style="padding-top: 2em"/>
                     </div>
                 </div>
             </div>
@@ -120,15 +121,14 @@ box-shadow: 0px 0px 21px -1px #005BC6">
         <div class="row q-pt-sm q-mx-md q-mb-sm items-end non-selectable">
             <div style="padding-top: 5px;" class="tx-list">
                 <div class="row justify-center">
-                    <div v-for="item in tx_list" :key="item.service_node_pubkey">
-                        <div v-if="isFull(item)" class="col-2" style="padding: 4%;">
-                            <div
-                                style="background-color: #222222; border-radius: 5px;margin:auto; padding: 50px;padding-top:5px;padding-bottom:5px">
+                    <div v-for="(item, index) in tx_list" :key="index">
+                        <div v-if="isFull(item)" class="col-2" style="padding: 1em;">
+                            <div :class="{'operator-address': item.is_operator, 'operator': true}">
                                 <h6 class="type" style="color:white">
                                     Oracle Node ID: {{
-                                        item.service_node_pubkey.substring(0, 4)
+                                        item.service_node_pubkey.slice(0, 4)
                                     }}...{{
-                                        item.service_node_pubkey.substring(item.service_node_pubkey.length - 5, item.service_node_pubkey.length - 1)
+                                        item.service_node_pubkey.slice(-4)
                                     }}
                                 </h6>
                                 <p class="main" style="color:white">
@@ -143,7 +143,7 @@ box-shadow: 0px 0px 21px -1px #005BC6">
                                     <!--                                    }}% <br/>-->
                                     Lock Time: {{
                                         getLockTime(item.registration_height)
-                                    }}</br>
+                                    }}<br>
                                     Requirement: {{ 100 }} XEQ
                                 </p>
 
@@ -156,11 +156,10 @@ box-shadow: 0px 0px 21px -1px #005BC6">
                                                label="Stake"/>
                                     </q-field>
                                 </div>
+                                <div>{{item.is_operator ? 'Operator': '&nbsp;'}}</div>
                                 <div v-if="!isFull(item.contributors)">
-
-                                    <div style="padding-bottom: 75px"/>
+                                    <div style="padding-bottom: 2em"/>
                                 </div>
-
                             </div>
                         </div>
 
@@ -261,7 +260,6 @@ export default {
                 { label: "Stake", value: "stake" },
                 { label: "Failed", value: "failed" }
             ]
-
         }
     },
     computed: mapState({
@@ -279,34 +277,34 @@ export default {
     },
     mounted () {
         let stake_data = this.state.gateway.wallet.staker.stake
-
-        if (!stake_data) return
-        let user_pools = []
-        let n_op = 0
-        this.tx_list.map(item => {
-            stake_data.staked_nodes.map(node => {
-                if (item.service_node_pubkey === node.node_key) {
-                    user_pools.push({ ...item, ...node })
-                }
+        if (!stake_data) {
+            let user_pools = []
+            let n_op = 0
+            this.tx_list.map(item => {
+                stake_data.staked_nodes.map(node => {
+                    if (item.service_node_pubkey === node.node_key) {
+                        user_pools.push({ ...item, ...node })
+                    }
+                })
             })
-        })
-        user_pools.map(node => {
-            if (node.is_operator) { n_op++ }
-        })
-        this.num_operating = n_op
-        this.staked_pools = user_pools
-        fetch("https://api.coingecko.com/api/v3/coins/triton?tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false\n")
-            .then(response => response.json())
-            .then(data => {
-                this.current_price = data.market_data.current_price.usd
-                this.$forceUpdate()
+            user_pools.map(node => {
+                if (node.is_operator) { n_op++ }
             })
-        this.stake_data = stake_data
-        this.total_stake_amount = stake_data.total_staked_amount
-        this.num_nodes_staked_to = stake_data.total_nodes_staked_to
-        this.next_unlock = stake_data.lowest_unlock_time_by_block
-        this.daily_reward = (720 / stake_data.total_nodes) * (stake_data.reward) * ((stake_data.total_staked_amount / stake_data.total_nodes_staked_to) / stake_data.avg_staking_req)
-        this.earnings_for_period = this.daily_reward * ((stake_data.avg_unlock_time - stake_data.avg_reg_height) / 720)
+            this.num_operating = n_op
+            this.staked_pools = user_pools
+            fetch("https://api.coingecko.com/api/v3/coins/triton?tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false\n")
+                .then(response => response.json())
+                .then(data => {
+                    this.current_price = data.market_data.current_price.usd
+                    this.$forceUpdate()
+                })
+            this.stake_data = stake_data
+            this.total_stake_amount = stake_data.total_staked_amount
+            this.num_nodes_staked_to = stake_data.total_nodes_staked_to
+            this.next_unlock = stake_data.lowest_unlock_time_by_block
+            this.daily_reward = (720 / stake_data.total_nodes) * (stake_data.reward) * ((stake_data.total_staked_amount / stake_data.total_nodes_staked_to) / stake_data.avg_staking_req)
+            this.earnings_for_period = this.daily_reward * ((stake_data.avg_unlock_time - stake_data.avg_reg_height) / 720)
+        }
     },
     watch: {
         stake_status: {
@@ -493,4 +491,25 @@ export default {
 </script>
 
 <style lang="scss">
+    .operator {
+        background-color: #222222; 
+        border-radius: 5px;
+        margin:auto; 
+        padding: 5px;
+         text-align: center;
+    }
+    .operator-address {
+        background-color: purple;
+        border-radius: 5px;
+        margin:auto; 
+        padding: 5px;
+        text-align: center;
+    }
+    .contributor {
+        background-color: rgb(19, 0, 128);
+        border-radius: 5px;
+        margin:auto; 
+        padding: 5px;
+        text-align: center;
+    }
 </style>

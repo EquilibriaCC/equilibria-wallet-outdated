@@ -3,7 +3,7 @@
 ### Introduction
 A Private and Decentralized Oracle Solution
 
-More information on the project can be found on the [website](https://equilibriacc.github.io). Equilibria is an open source project, and we encourage contributions from anyone with something to offer.
+More information on the project can be found on the [website](https://equilibriacc.com). Equilibria is an open source project, and we encourage contributions from anyone with something to offer.
 
 
 ### About this project
@@ -18,7 +18,7 @@ Please submit any changes as pull requests to the development branch, all change
 
 #### Commands
 ```
-nvm use 11.9.0
+nvm use 14.27.3
 npm install -g quasar-cli
 git clone https://github.com/EquilibriaCC/equilibria-wallet -b development
 cd equilibria-wallet
@@ -26,8 +26,11 @@ cp path_to_equilibria_binaries/daemon bin/
 cp path_to_equilibria_binaries/equilibria-wallet-rpc bin/
 npm install
 
+brew install perl (macOS)
+pip3 install ds-store (macOS)
+
 //build
-quasar build -m electron -t mat
+npm run build
 
 //dev
 quasar dev -m electron -t mat

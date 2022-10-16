@@ -235,6 +235,7 @@ export default {
     },
     data () {
         return {
+            show: false,
             QR: {
                 visible: false,
                 address: null,

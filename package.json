@@ -1,6 +1,6 @@
 {
   "name": "equilibria-wallet-atom",
-  "version": "13.2.0",
+  "version": "13.2.1",
   "daemonVersion": "13.2.0",
   "description": "Modern GUI interface for Equilibria",
   "productName": "Equilibria Wallet",
@@ -41,7 +41,7 @@
     "babel-eslint": "^10.1.0",
     "devtron": "^1.4.0",
     "electron": "^4.2.12",
-    "electron-builder": "^20.44.4",
+    "electron-builder": "^23.0.3",
     "electron-debug": "^2.2.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-packager": "^13.1.1",

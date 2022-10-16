@@ -108,7 +108,7 @@
                 </div>
             </template>
 
-            <div class="q-mt-lg">
+            <div class="q-mt-lg  text-right">
                 <q-btn
                     color="primary"
                     @click="hideModal('private_keys')"

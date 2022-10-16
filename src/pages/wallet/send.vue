@@ -364,7 +364,7 @@ export default {
         },
         // Conversion Function------------------------------------------------------------
         // FROM WHAT EVER CURRENCY TO XTRI
-        conversionToXtri: function () {
+        conversionToXtri: async function () {
             // xtri price in sats variable
             let sats
             // btc prices in differnt currencies
@@ -372,46 +372,44 @@ export default {
             let prices = []
 
             // getting xtri price in sats from Trade Ogre
-            axios.get("https://tradeogre.com/api/v1/ticker/BTC-XEQ").then(res => {
-                sats = res.data.price
+            const res = await axios.get("https://tradeogre.com/api/v1/ticker/BTC-XEQ")
+            sats = res.data.price
 
                 // getting btc price in usd
-                axios.get("https://blockchain.info/ticker").then(res => {
-                    // btc prices in difffernt gov currencys
-                    prices[0] = res.data.USD["15m"]
-                    prices[1] = res.data.AUD["15m"]
-                    prices[2] = res.data.BRL["15m"]
-                    prices[3] = res.data.CAD["15m"]
-                    prices[4] = res.data.CHF["15m"]
-                    prices[5] = res.data.CLP["15m"]
-                    prices[6] = res.data.CNY["15m"]
-                    prices[7] = res.data.DKK["15m"]
-                    prices[8] = res.data.EUR["15m"]
-                    prices[9] = res.data.GBP["15m"]
-                    prices[10] = res.data.HKD["15m"]
-                    prices[11] = res.data.INR["15m"]
-                    prices[12] = res.data.ISK["15m"]
-                    prices[13] = res.data.JPY["15m"]
-                    prices[14] = res.data.KRW["15m"]
-                    prices[15] = res.data.NZD["15m"]
-                    prices[16] = res.data.PLN["15m"]
-                    prices[17] = res.data.RUB["15m"]
-                    prices[18] = res.data.SEK["15m"]
-                    prices[19] = res.data.SGD["15m"]
-                    prices[20] = res.data.THB["15m"]
-                    prices[21] = res.data.TWD["15m"]
+            const tickerResult = await axios.get("https://blockchain.info/ticker")
+            // btc prices in difffernt gov currencys
+            prices[0] = tickerResult.data.USD["15m"]
+            prices[1] = tickerResult.data.AUD["15m"]
+            prices[2] = tickerResult.data.BRL["15m"]
+            prices[3] = tickerResult.data.CAD["15m"]
+            prices[4] = tickerResult.data.CHF["15m"]
+            prices[5] = tickerResult.data.CLP["15m"]
+            prices[6] = tickerResult.data.CNY["15m"]
+            prices[7] = tickerResult.data.DKK["15m"]
+            prices[8] = tickerResult.data.EUR["15m"]
+            prices[9] = tickerResult.data.GBP["15m"]
+            prices[10] = tickerResult.data.HKD["15m"]
+            prices[11] = tickerResult.data.INR["15m"]
+            prices[12] = tickerResult.data.ISK["15m"]
+            prices[13] = tickerResult.data.JPY["15m"]
+            prices[14] = tickerResult.data.KRW["15m"]
+            prices[15] = tickerResult.data.NZD["15m"]
+            prices[16] = tickerResult.data.PLN["15m"]
+            prices[17] = tickerResult.data.RUB["15m"]
+            prices[18] = tickerResult.data.SEK["15m"]
+            prices[19] = tickerResult.data.SGD["15m"]
+            prices[20] = tickerResult.data.THB["15m"]
+            prices[21] = tickerResult.data.TWD["15m"]
 
-                    currentPrice = prices[this.newTx.currency]
+            currentPrice = prices[this.newTx.currency]
 
-                    // Do conversion with current currency
-                    this.newTx.amount = ((this.newTx.amountInCurrency / currentPrice) / sats).toFixed(4)
-                })
-            })
+            // Do conversion with current currency
+            this.newTx.amount = ((this.newTx.amountInCurrency / currentPrice) / sats).toFixed(4)
 
             return 1
         },
         // FROM XTRI TO WHAT EVER CURRENCY
-        conversionFromXtri: function () {
+        conversionFromXtri: async function () {
             // xtri price in sats variable
             let sats
             // btc prices in differnt currencies
@@ -419,41 +417,40 @@ export default {
             let prices = []
 
             // getting xtri price in sats from Trade Ogre
-            axios.get("https://tradeogre.com/api/v1/ticker/BTC-XEQ").then(res => {
-                sats = res.data.price
+            const res = await axios.get("https://tradeogre.com/api/v1/ticker/BTC-XEQ")
+            sats = res.data.price
 
                 // getting btc price in usd
-                axios.get("https://blockchain.info/ticker").then(res => {
-                    // btc prices in difffernt gov currencys
-                    prices[0] = res.data.USD["15m"]
-                    prices[1] = res.data.AUD["15m"]
-                    prices[2] = res.data.BRL["15m"]
-                    prices[3] = res.data.CAD["15m"]
-                    prices[4] = res.data.CHF["15m"]
-                    prices[5] = res.data.CLP["15m"]
-                    prices[6] = res.data.CNY["15m"]
-                    prices[7] = res.data.DKK["15m"]
-                    prices[8] = res.data.EUR["15m"]
-                    prices[9] = res.data.GBP["15m"]
-                    prices[10] = res.data.HKD["15m"]
-                    prices[11] = res.data.INR["15m"]
-                    prices[12] = res.data.ISK["15m"]
-                    prices[13] = res.data.JPY["15m"]
-                    prices[14] = res.data.KRW["15m"]
-                    prices[15] = res.data.NZD["15m"]
-                    prices[16] = res.data.PLN["15m"]
-                    prices[17] = res.data.RUB["15m"]
-                    prices[18] = res.data.SEK["15m"]
-                    prices[19] = res.data.SGD["15m"]
-                    prices[20] = res.data.THB["15m"]
-                    prices[21] = res.data.TWD["15m"]
+            const tickerResult = await axios.get("https://blockchain.info/ticker")
+            // btc prices in difffernt gov currencys
+            prices[0] = tickerResult.data.USD["15m"]
+            prices[1] = tickerResult.data.AUD["15m"]
+            prices[2] = tickerResult.data.BRL["15m"]
+            prices[3] = tickerResult.data.CAD["15m"]
+            prices[4] = tickerResult.data.CHF["15m"]
+            prices[5] = tickerResult.data.CLP["15m"]
+            prices[6] = tickerResult.data.CNY["15m"]
+            prices[7] = tickerResult.data.DKK["15m"]
+            prices[8] = tickerResult.data.EUR["15m"]
+            prices[9] = tickerResult.data.GBP["15m"]
+            prices[10] = tickerResult.data.HKD["15m"]
+            prices[11] = tickerResult.data.INR["15m"]
+            prices[12] = tickerResult.data.ISK["15m"]
+            prices[13] = tickerResult.data.JPY["15m"]
+            prices[14] = tickerResult.data.KRW["15m"]
+            prices[15] = tickerResult.data.NZD["15m"]
+            prices[16] = tickerResult.data.PLN["15m"]
+            prices[17] = tickerResult.data.RUB["15m"]
+            prices[18] = tickerResult.data.SEK["15m"]
+            prices[19] = tickerResult.data.SGD["15m"]
+            prices[20] = tickerResult.data.THB["15m"]
+            prices[21] = tickerResult.data.TWD["15m"]
 
-                    currentPrice = prices[this.newTx.currency]
+            currentPrice = prices[this.newTx.currency]
 
-                    // Do conversion with current currency
-                    this.newTx.amountInCurrency = ((this.newTx.amount * currentPrice) * sats).toFixed(4)
-                })
-            })
+            // Do conversion with current currency
+            this.newTx.amountInCurrency = ((this.newTx.amount * currentPrice) * sats).toFixed(4)
+
 
             return 1
         },
