@@ -143,7 +143,7 @@
                                     <!--                                    }}% <br/>-->
                                     Lock Time: {{
                                         getLockTime(item.registration_height)
-                                    }}</br>
+                                    }}<br>
                                     Requirement: {{ 100 }} XEQ
                                 </p>
 

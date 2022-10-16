@@ -194,7 +194,4 @@ app.on("before-quit", async () => {
 
 app.on("quit", async () => {
     console.log('electron quit close>>>>>>>>>>')
-    backend = null
-    await mainWindow.close()
-    app.quit()
 })
