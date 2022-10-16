@@ -41,7 +41,7 @@
 
             <div class="q-mt-md q-mb-lg external-links">
                 <p>
-                    <a @click="openExternal('https://equilibriacc.github.io/')" href="#">https://equilibriacc.github.io/</a>
+                    <a @click="openExternal('https://equilibriacc.com/')" href="#">https://equilibriacc.com/</a>
                 </p>
                 <p>
                     <a @click="openExternal('https://discord.gg/Ps9pBmc2QX')" href="#">Discord</a> -
